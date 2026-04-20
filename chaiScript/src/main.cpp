@@ -10,7 +10,7 @@
 #include <chaiscript/chaiscript.hpp>
 
 #include "BaseFlux/Main.h"
-#include "ImConsole.h"
+#include "../../include/ImConsole.h"
 
 BaseFlux::Main app;
 ImConsole console;
@@ -127,7 +127,7 @@ bool initApp() {
 int main(int argc, char* argv[]) {
 
     app.getSettings() = {
-        .Company = "ChaiFlux",
+        .Company = "ScriptFlux",
         .Caption = "ChaiFlux",
         .Version = "0.260420.5",
     };

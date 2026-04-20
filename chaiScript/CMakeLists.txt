@@ -31,6 +31,18 @@ set(CHAISCRIPT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(chaiscript)
 
+# ------------- ChaiScript Extras
+# FIXME
+# FetchContent_Declare(
+#   ChaiScript_Extras
+#   GIT_REPOSITORY https://github.com/ChaiScript/ChaiScript_Extras.git
+#   GIT_TAG        v1.0.1
+#
+# )
+#
+# FetchContent_MakeAvailable(ChaiScript_Extras)
+#
+
 
 # ------------- Main
 add_executable(${PROJECT_NAME}
