@@ -27,10 +27,9 @@ Compile and run :
 cd lua
 cmake -S . -B build
 cmake --build build
-./ChaiFlux
+./LuaFlux
 ```
 - First impressions:
     - ➕ Easy to embed.
     - ➕ Lua is very popular
     - ➕➕ sol2 make it very easy to bind
-    - I like c like scripting more than lua but thats me ;)
