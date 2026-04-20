@@ -53,12 +53,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-target_precompile_headers(ChaiFlux PRIVATE
+target_precompile_headers(${PROJECT_NAME} PRIVATE
     <chaiscript/chaiscript.hpp>
     <chaiscript/chaiscript_stdlib.hpp>
 )
 
-target_include_directories(ChaiFlux PRIVATE ${chaiscript_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PRIVATE ${chaiscript_SOURCE_DIR}/include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     BaseFlux

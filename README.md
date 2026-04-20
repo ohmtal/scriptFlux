@@ -18,3 +18,18 @@ First impressions:
     - ➕ Easy to bind
     - ➖ Linking takes ages
 
+# Lua / Sol2
+Create a Application with a Lua console.
+
+Note: It compiles SDL3, ImGui, BaseFlux and Lua.
+Compile and run :
+```
+cd lua
+cmake -S . -B build
+cmake --build build
+./ChaiFlux
+```
+First impressions:
+    - ➕ Easy to embed.
+    - ➕➕ sol2 make it very easy to bind
+    - I like c like scripting more than lua but thats me ;)
