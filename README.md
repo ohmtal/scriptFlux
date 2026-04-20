@@ -1,5 +1,6 @@
 # ChaiFlux - playground for ChaiScript bindings with BaseFlux
 
+## Status: Buildsystem and ChaiScript Console
 
 Compile and run : 
 ```

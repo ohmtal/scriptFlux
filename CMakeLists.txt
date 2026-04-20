@@ -18,6 +18,20 @@ FetchContent_Declare(
   GIT_TAG        main
 )
 FetchContent_MakeAvailable(BaseFlux)
+
+# ------------- ChaiScript
+FetchContent_Declare(
+  chaiscript
+  GIT_REPOSITORY https://github.com/ChaiScript/ChaiScript.git
+  GIT_TAG        v6.1.0
+)
+
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+set(CHAISCRIPT_BUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(chaiscript)
+
+
 # ------------- Main
 add_executable(${PROJECT_NAME}
     ${PROJECT_SRC}
@@ -26,6 +40,14 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_DEFINE_MATH_OPERATORS)
 set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
+
+target_precompile_headers(ChaiFlux PRIVATE
+    <chaiscript/chaiscript.hpp>
+    <chaiscript/chaiscript_stdlib.hpp>
+)
+
+target_include_directories(ChaiFlux PRIVATE ${chaiscript_SOURCE_DIR}/include)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
     BaseFlux
 )
