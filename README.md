@@ -13,6 +13,7 @@ cmake --build build
 ./ChaiFlux
 ```
 First impressions:
+
     - ➕ Easy to embed.
     - ➕ C-like
     - ➕ Easy to bind
@@ -30,6 +31,7 @@ cmake --build build
 ./ChaiFlux
 ```
 First impressions:
+
     - ➕ Easy to embed.
     - ➕➕ sol2 make it very easy to bind
     - I like c like scripting more than lua but thats me ;)
