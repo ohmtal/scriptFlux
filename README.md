@@ -31,5 +31,6 @@ cmake --build build
 ```
 - First impressions:
     - ➕ Easy to embed.
+    - ➕ Lua is very popular
     - ➕➕ sol2 make it very easy to bind
     - I like c like scripting more than lua but thats me ;)
