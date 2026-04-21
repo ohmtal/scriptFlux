@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.24)
 project(LuaFlux)
 set(PROJECT_SRC
     src/main.cpp
+    src/bindings.cpp
 )
 # -----------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 20)

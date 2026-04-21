@@ -97,7 +97,20 @@ void initConsole() {
 
 
 void initLua() {
-    lua.open_libraries(sol::lib::base);
+    // lua.open_libraries(sol::lib::base);
+    lua.open_libraries(
+        sol::lib::base
+        ,sol::lib::package
+        ,sol::lib::coroutine
+        ,sol::lib::os
+        ,sol::lib::math
+        ,sol::lib::table
+        ,sol::lib::string
+        ,sol::lib::debug
+        ,sol::lib::io
+
+    );
+
 
     // ------ register function ----
     lua.set_function("HelloLua", &Hello);
