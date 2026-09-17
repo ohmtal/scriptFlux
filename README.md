@@ -24,7 +24,7 @@ Create a Application with a Lua console.
 Note: It compiles SDL3, ImGui, BaseFlux and Lua.
 Compile and run :
 ```
-cd lua
+cd luasol2
 cmake -S . -B build
 cmake --build build
 ./LuaFlux
