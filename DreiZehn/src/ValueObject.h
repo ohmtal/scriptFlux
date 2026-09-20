@@ -7,7 +7,10 @@
 #include <string>
 #include <iostream>
 
-enum class ValueObjectType { String, Userdata, Function };
+namespace DreiZehn{
+
+//TODO flexible system ...
+enum class ValueObjectType { String, Userdata };
 
 struct ValueObject {
     ValueObjectType type;
@@ -25,3 +28,4 @@ struct UserdataValueObject : public ValueObject {
     void* rawCustomPointer;
     UserdataValueObject(void* p) : ValueObject(ValueObjectType::Userdata), rawCustomPointer(p) {}
 };
+} //namespace

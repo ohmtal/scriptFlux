@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Thomas Hühn (XXTH)
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------
-// NaN Boxing Test
+// NaN Boxing Value
 //-----------------------------------------------------------------------------
 #pragma once
 
@@ -12,6 +12,8 @@
 #include <cassert>
 
 #include "ValueObject.h"
+
+namespace DreiZehn{
 
 constexpr uint64_t QNAN_MASK = 0x7FF8000000000000ULL;
 constexpr uint64_t TAG_INT   = 0x0001000000000000ULL; // Integer
@@ -24,6 +26,9 @@ private:
     explicit Value(uint64_t b) : bits(b) {}
 
 public:
+    // Default constructor
+    Value() : bits(0) {}
+
     Value(double d) {
         bits = std::bit_cast<uint64_t>(d);
     }
@@ -60,3 +65,4 @@ public:
         return std::bit_cast<void*>(ptrBits);
     }
 };
+} //namespace
