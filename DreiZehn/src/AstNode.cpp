@@ -29,11 +29,7 @@ namespace DreiZehn {
     // -------------------------------------------------------------------------
     Value VariableExpression::evaluate(Environment& env) {
         return env.getVariable(name);
-        // if (env.variables.find(name) != env.variables.end()) {
-        //     return env.variables.at(name);
-        // }
-        // Tools::errorf("Variable not found: %s\n", name.c_str());
-        // return Value();
+
     }
     // -------------------------------------------------------------------------
     Value CallExpression::evaluate(Environment& env) {
@@ -84,8 +80,18 @@ namespace DreiZehn {
     // -------------------------------------------------------------------------
 
     Value BinaryExpression::evaluate(Environment& env)  {
+        if (!left.get() || !right.get()) {
+            Tools::errorf("Parse Error!");
+            return Value();
+        }
         Value lVal = left->evaluate(env);
         Value rVal = right->evaluate(env);
+
+
+        if ((!lVal.isDouble() && !lVal.isInt()) || (!rVal.isDouble() && !rVal.isInt()) ) {
+            Tools::errorf("TYPE ERROR: We need numbers here");
+            return Value();
+        }
 
         if (op == TokenType::Greater) {
             double l = lVal.isInt() ? lVal.asInt() : lVal.asDouble();

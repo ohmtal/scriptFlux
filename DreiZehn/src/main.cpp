@@ -3,12 +3,22 @@
 
 #include "DreiZehn.h"
 
+void RegisterUserFunc() {
+    using namespace DreiZehn;
+    FunctionMap::RegisterFunction("foo", [](std::vector<Value>& args, Value& ret) -> bool {
+        printf("The Foo was here ...\n");
+        ret = 4711.0815;
+        return true;
+    });
+}
+
 
 int main(int argc, char* argv[]) {
     using namespace DreiZehn;
 
     Environment env;
     RegisterCoreFunctions(env);
+    RegisterUserFunc();
 
     if (argc > 1) {
         std::string scriptPath = argv[1];
@@ -21,7 +31,7 @@ int main(int argc, char* argv[]) {
     }
 
     // -------------------------------------------------------------------------
-    // Console Mode
+    // Console Mode - handling multi line input for "for" and "fn"
     // -------------------------------------------------------------------------
     std::string line;
 

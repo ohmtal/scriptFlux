@@ -38,20 +38,7 @@ namespace DreiZehn {
             return true;
         });
 
-        // -------- add function "+" --------------
-        RegisterFunction("add", [](std::vector<Value>& args, Value& ret) -> bool {
-            if (args.size() < 2) return false;
 
-            double sum = 0;
-            for (auto& v : args) {
-                if (v.isInt()) sum += v.asInt();
-                if (v.isDouble()) sum += v.asDouble();
-            }
-
-            ret = Value(sum);
-            return true;
-        });
-        // ------------------------------------------
         DreiZehn::FunctionMap::RegisterFunction("run", [&env](std::vector<Value>& args, Value& ret) -> bool {
             if (args.size() < 1) {
                 Tools::errorf("file name requires for run\n");

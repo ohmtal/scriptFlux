@@ -35,13 +35,15 @@ namespace DreiZehn {
         Return
     };
 
+    // moved to static so we have one pool
+    static std::vector<ValueObject*> gGarbageCollection;
+
 class Environment {
 private:
     // variables stack
     std::unordered_map<std::string, Value> variables;
 
     // Garbage collection
-    std::vector<ValueObject*> mGarbageCollection;
     Environment* parent = nullptr;
 public:
     Environment() : parent(nullptr) {}
@@ -78,14 +80,14 @@ public:
     // GarbageCollection
     // -------------------------------------------------------------------------
     void addToGarbageCollection(ValueObject* obj) {
-        mGarbageCollection.push_back(obj);
+        gGarbageCollection.push_back(obj);
     }
 
     void doGarbageCollection() {
-        for (auto* obj : mGarbageCollection) {
+        for (auto* obj : gGarbageCollection) {
             delete obj;
         }
-        mGarbageCollection.clear();
+        gGarbageCollection.clear();
     }
     // -------------------------------------------------------------------------
     // EXECUTE :D - currentEnv for function calls
@@ -159,49 +161,7 @@ public:
         return FlowSignal::None;
     }
 
-    // void execute(ASTNode* node, Environment& currentEnv) {
-    //     if (!node) return;
-    //
-    //     if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
-    //         currentEnv.setVariable(assign->varName, assign->rhs->evaluate(currentEnv));
-    //     }
-    //     else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
-    //         Value condVal = ifStmt->condition->evaluate(currentEnv);
-    //
-    //         bool isTrue = false;
-    //         if (condVal.isInt() && condVal.asInt() != 0) isTrue = true;
-    //         if (condVal.isDouble() && condVal.asDouble() != 0.0) isTrue = true;
-    //
-    //         if (isTrue) {
-    //             execute(ifStmt->thenBranch.get(), currentEnv);
-    //         }
-    //     }
-    //     else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
-    //         Value startVal = forStmt->startExpr->evaluate(currentEnv);
-    //         Value endVal = forStmt->endExpr->evaluate(currentEnv);
-    //
-    //         if (!startVal.isInt() || !endVal.isInt()) {
-    //             Tools::errorf("Error: 'for'-loop only support integer borders\n");
-    //             return;
-    //         }
-    //
-    //         int start = startVal.asInt();
-    //         int end = endVal.asInt();
-    //
-    //         Environment loopEnv(&currentEnv);
-    //
-    //         for (int i = start; i <= end; ++i) {
-    //             loopEnv.setVariable(forStmt->iteratorName, Value(i));
-    //
-    //             for (auto& statement : forStmt->body) {
-    //                 currentEnv.execute(statement.get(), loopEnv);
-    //             }
-    //         }
-    //     }
-    //     else if (auto* expr = dynamic_cast<Expression*>(node)) {
-    //         expr->evaluate(currentEnv);
-    //     }
-    // }
+
     // -------------------------------------------------------------------------
     // main execute
     void execute(ASTNode* node) {

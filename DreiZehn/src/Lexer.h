@@ -145,31 +145,7 @@ public:
                 continue;
             }
 
-            // // if (peek() == '"') {
-            // //     advance(); //skip inital '"'
-            // //     std::string strValue;
-            // //
-            // //     while (peek() != '"' && peek() != '\0') {
-            // //         // skip \" oder \n a
-            // //         if (peek() == '\\') {
-            // //             advance();
-            // //             if (peek() == 'n') { strValue += '\n'; advance(); }
-            // //             else if (peek() == '"') { strValue += '"'; advance(); }
-            // //             else { strValue += '\\'; }
-            // //         } else {
-            // //             strValue += advance();
-            // //         }
-            // //     }
-            // //
-            // //     if (peek() == '"') {
-            // //         advance(); // skip trailing '"'
-            // //     } else {
-            // //         Tools::errorf("[Lexer-ERROR] String not closed!\n");
-            // //     }
-            // //     tokens.push_back({TokenType::StringLiteral, strValue});
-            // //     continue;
-            // // } //STR
-            // ----------------------------------------------------------------
+
             advance(); // skip unknown
         }
         tokens.push_back({TokenType::EOFToken, ""});
