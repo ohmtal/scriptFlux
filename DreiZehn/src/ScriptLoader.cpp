@@ -29,7 +29,10 @@ namespace DreiZehn {
 
         while (std::getline(file, line)) {
             lineCount++;
-            if (line.empty() || line[0] == '#') continue;
+
+            size_t firstRealChar = line.find_first_not_of(" \t\r\n");
+            if (firstRealChar == std::string::npos) continue;
+            if (line[firstRealChar] == '#') continue;
 
             Lexer lexer(line);
             auto tokens = lexer.tokenize();

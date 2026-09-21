@@ -34,8 +34,7 @@ namespace DreiZehn {
         });
         // -------- basic random --------------
         RegisterFunction("random", [](std::vector<Value>& args, Value& ret) -> bool {
-            // Generiere eine Zufallszahl (z.B. zwischen 0 und 100)
-            ret = Value(static_cast<int>(rand() % 100));
+            ret = Value(rand());
             return true;
         });
 

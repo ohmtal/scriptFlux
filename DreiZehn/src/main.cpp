@@ -4,13 +4,24 @@
 #include "DreiZehn.h"
 
 
-
-int main() {
+int main(int argc, char* argv[]) {
     using namespace DreiZehn;
+
     Environment env;
     RegisterCoreFunctions(env);
 
-    // special i need env here !! ----------------------------------------------
+    if (argc > 1) {
+        std::string scriptPath = argv[1];
+
+        bool success = RunScriptFile(scriptPath, env);
+
+        env.shutDown();
+
+        return success ? 0 : 1;
+    }
+
+    // -------------------------------------------------------------------------
+    // Console Mode
     // -------------------------------------------------------------------------
     std::string line;
 

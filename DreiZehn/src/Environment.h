@@ -47,9 +47,22 @@ public:
     Environment() : parent(nullptr) {}
     Environment(Environment* parentEnv) : parent(parentEnv) {}
     // -------------------------------------------------------------------------
+
     void setVariable(const std::string& name, Value val) {
+        if (variables.find(name) != variables.end()) {
+            variables[name] = val;
+            return;
+        }
+
+        if (parent != nullptr) {
+            parent->setVariable(name, val);
+            return;
+        }
+
         variables[name] = val;
     }
+
+
 
     Value getVariable(const std::string& name) {
         if (variables.find(name) != variables.end()) {
