@@ -70,7 +70,7 @@ namespace DreiZehn {
             // ---  end ---
             if (dynamic_cast<FunctionDefineEndNode*>(ast.get())) {
                 if (blockStack.empty()) {
-                    Tools::errorf("[Zeile %d] Syntax-Fehler: 'end' ohne Block.\n", lineCount);
+                    Tools::errorf("[Line %d] Syntax-Error: 'end' without if/for.\n", lineCount);
                     return false;
                 }
 
