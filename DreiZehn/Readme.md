@@ -1,6 +1,14 @@
-# DreiZehn Scripting Language Syntax & Documentation
+# DreiZehn-Script: Scripting Language Syntax & Documentation
 
-A lightweight, high-performance embedded scripting language built from scratch in C++. 
+A lightweight, line by line, embedded scripting language built from scratch in C++. 
+
+[Benchmark Results](Benchmark.md )
+
+## Text Edior
+
+Since it's a uncommon syntax i had good results in my Editor setting Highlight mode:
+- lua
+- tcsh
 
 ## Core Architecture
 * **NaN-Boxing Representation:** All variables, primitives (`int32_t`, `double`), and managed pointers (`void*`/`Object*`) are packed into a highly efficient **8-byte single-register** memory footprint.
