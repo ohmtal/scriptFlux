@@ -5,7 +5,7 @@
 // Core Commands
 //-----------------------------------------------------------------------------
 #pragma once
-
+#include <ctime>
 #include "FunctionMap.h"
 #include "ScriptLoader.h"
 
@@ -13,6 +13,8 @@ namespace DreiZehn {
 
 
     void RegisterCoreFunctions( Environment& env) {
+        std::srand(std::time(nullptr)); //setup random seed
+
         using namespace FunctionMap;
         // -------- print --------------
         RegisterFunction("print", [](std::vector<Value>& args, Value& ret) -> bool {
@@ -34,7 +36,7 @@ namespace DreiZehn {
         });
         // -------- basic random --------------
         RegisterFunction("random", [](std::vector<Value>& args, Value& ret) -> bool {
-            ret = Value(rand());
+            ret = Value(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
             return true;
         });
 
