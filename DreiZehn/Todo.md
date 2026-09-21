@@ -15,7 +15,8 @@ It needs to be done in "end"
 - add some basic SDL3 bindings ;) Test if i can use my ElfScript macros - but i 
 don't have to PoD Types here at the moment. 
 - write the starfield demo in DreiZehn
-
+- local / global var is sometime mixed - since we fetch a global it is not found on local scope
+but it's a bit unclear when its global and when its local
 
 # future ideas
 

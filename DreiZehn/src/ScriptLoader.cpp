@@ -28,6 +28,8 @@ namespace DreiZehn {
 
         int lineCount = 0;
 
+        // std::vector<std::unique_ptr<ASTNode>> allStatements;
+
         while (std::getline(stream, line)) {
             lineCount++;
 
@@ -41,7 +43,13 @@ namespace DreiZehn {
 
             auto statements = parser.parseStatements();
 
+            // NOT faster! std::ranges::move(statements, std::back_inserter(allStatements));
+            // but maybe usful to store the prog ? .. but for what
+        // };
+
+
             for (auto& ast : statements) {
+            // for (auto& ast : allStatements) {
                 if (!ast) continue;
 
                 // --- fn ---
@@ -78,100 +86,12 @@ namespace DreiZehn {
                             }
                         }
                     } else {
+                        // IMPORTANT: keep the "shared_ptr" pointer alive:
                         globalLoopKeeper[sharedLoop.get()] = sharedLoop;
                     }
                     continue;
                 }
 
-
-                // bool isFor = dynamic_cast<ForStatement*>(ast.get()) != nullptr;
-                // bool isWhile = dynamic_cast<WhileStatement*>(ast.get()) != nullptr;
-                //
-                // if (isFor || isWhile) {
-                //     std::shared_ptr<BlockStatement> sharedLoop = std::static_pointer_cast<BlockStatement>(ast);
-                //
-                //     ast.reset();
-                //
-                //     BlockType bType = isFor ? BlockType::ForLoop : BlockType::WhileLoop;
-                //     blockStack.push_back({bType, "", sharedLoop.get()});
-                //
-                //     if (blockStack.size() > 1) {
-                //         auto& outerBlock = blockStack[blockStack.size() - 2];
-                //         if (outerBlock.type == BlockType::Function) {
-                //             FunctionMap::RegisteredScriptFunctions[outerBlock.funcName].body.push_back(sharedLoop);
-                //         } else if (outerBlock.type == BlockType::ForLoop || outerBlock.type == BlockType::WhileLoop) {
-                //             outerBlock.blockNodePointer->body.push_back(sharedLoop);
-                //         }
-                //     } else {
-                //         globalLoopKeeper[sharedLoop.get()] = sharedLoop;
-                //     }
-                //     continue;
-                // }
-
-
-
-                // // bool isFor = dynamic_cast<ForStatement*>(ast.get()) != nullptr;
-                // // bool isWhile = dynamic_cast<WhileStatement*>(ast.get()) != nullptr;
-                // //
-                // // if (isFor || isWhile) {
-                // //     std::shared_ptr<ASTNode> sharedBase = std::move(ast);
-                // //     std::shared_ptr<BlockStatement> sharedLoop = std::static_pointer_cast<BlockStatement>(sharedBase);
-                // //
-                // //     BlockType bType = isFor ? BlockType::ForLoop : BlockType::WhileLoop;
-                // //     blockStack.push_back({bType, "", sharedLoop.get()});
-                // //
-                // //     if (blockStack.size() > 1) {
-                // //         auto& outerBlock = blockStack[blockStack.size() - 2];
-                // //         if (outerBlock.type == BlockType::Function) {
-                // //             FunctionMap::RegisteredScriptFunctions[outerBlock.funcName].body.push_back(sharedLoop);
-                // //         } else if (outerBlock.type == BlockType::ForLoop || outerBlock.type == BlockType::WhileLoop) {
-                // //             outerBlock.blockNodePointer->body.push_back(sharedLoop);
-                // //         }
-                // //     } else {
-                // //         globalLoopKeeper[sharedLoop.get()] = sharedLoop;
-                // //     }
-                // //     continue;
-                // // }
-
-                // // // --- for ---
-                // // if (dynamic_cast<ForStatement*>(ast.get())) {
-                // //     std::shared_ptr<ASTNode> sharedBase = std::move(ast);
-                // //     std::shared_ptr<ForStatement> sharedFor = std::static_pointer_cast<ForStatement>(sharedBase);
-                // //
-                // //     blockStack.push_back({BlockType::ForLoop, "", sharedFor.get()});
-                // //
-                // //     if (blockStack.size() > 1) {
-                // //         auto& outerBlock = blockStack[blockStack.size() - 2];
-                // //         if (outerBlock.type == BlockType::Function) {
-                // //             FunctionMap::RegisteredScriptFunctions[outerBlock.funcName].body.push_back(sharedFor);
-                // //         } else if (outerBlock.type == BlockType::ForLoop) {
-                // //             outerBlock.forNodePointer->body.push_back(sharedFor);
-                // //         }
-                // //     } else {
-                // //         globalForKeeper[sharedFor.get()] = sharedFor;
-                // //     }
-                // //     continue;
-                // // }
-                // // // --- while ---
-                // // if (dynamic_cast<WhileStatement*>(ast.get())) {
-                // //     std::shared_ptr<ASTNode> sharedBase = std::move(ast);
-                // //     std::shared_ptr<WhileStatement> sharedWhile = std::static_pointer_cast<WhileStatement>(sharedBase);
-                // //
-                // //     blockStack.push_back({BlockType::WhileLoop, "", nullptr, sharedWhile.get()});
-                // //
-                // //     if (blockStack.size() > 1) {
-                // //         auto& outerBlock = blockStack[blockStack.size() - 2];
-                // //         if (outerBlock.type == BlockType::Function) {
-                // //             FunctionMap::RegisteredScriptFunctions[outerBlock.funcName].body.push_back(sharedWhile);
-                // //         } else if (outerBlock.type == BlockType::WhileLoop) {
-                // //             outerBlock.forNodePointer->body.push_back(sharedWhile);
-                // //         }
-                // //     } else {
-                // //         globalWhileKeeper[sharedWhile.get()] = sharedWhile;
-                // //     }
-                // //     continue;
-                // // }
-                // ---  end ---
                 if (dynamic_cast<FunctionDefineEndNode*>(ast.get())) {
                     if (blockStack.empty()) {
                         Tools::errorf("[Line %d] Syntax-Error: 'end' without if/for.\n", lineCount);
