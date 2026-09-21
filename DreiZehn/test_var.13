@@ -16,7 +16,7 @@ for j 0 (JLOOPS - 1)
     print  "SUM (--) IS: " localX
 
     localX = 66
-    print  "set Sum to 66 == " (localX * 1))
+    print  "set Sum to 66 == " (localX * 1)
 
     for i 0 (ILOOPS - 1)
         localX = localX * (i + 1)
@@ -28,11 +28,11 @@ for j 0 (JLOOPS - 1)
     limit = (ILOOPS / 2) - 1
     ran = 0.0
     for i 0 limit
-        ran = random * i
+        ran = math.randomf * i
         localX = localX - ran
         localX = localX + ran
     end
-    print  "last ran" ran)
+    print  "last ran" ran
     print  "SUM (rand +-) IS: " localX
 end
 

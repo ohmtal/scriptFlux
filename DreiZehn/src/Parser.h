@@ -22,7 +22,8 @@ private:
     size_t pos = 0;
 
     Token peek() { return tokens[pos]; }
-    Token advance() { return tokens[pos++]; }
+    Token peekNext() { if (pos + 1 < tokens.size()) return tokens[pos+1]; else return Token(TokenType::EOFToken); }
+    Token advance() { if (pos + 1 < tokens.size()) return tokens[pos++]; else return Token(TokenType::EOFToken);}
 
     // -------------------------------------------------------------------------
 
@@ -40,6 +41,7 @@ private:
     bool isContinuePeak() {
         return peek().type != TokenType::EOFToken
         && peek().type != TokenType::RParen
+        && peek().type != TokenType::Semicolon
         && !isMathType();
     }
     // -------------------------------------------------------------------------
@@ -96,7 +98,9 @@ private:
     std::unique_ptr<Expression> parseComparison() {
         auto left = parseMath();
 
-        while (peek().type == TokenType::Greater || peek().type == TokenType::Less || peek().type == TokenType::Equal) {
+        while (peek().type == TokenType::Greater
+            || peek().type == TokenType::Less
+            || peek().type == TokenType::Equal) {
             Token op = advance();
             auto right = parseMath();
             left = std::make_unique<BinaryExpression>(std::move(left), op.type, std::move(right));
@@ -147,7 +151,42 @@ public:
     Parser(std::vector<Token> t) : tokens(std::move(t)) {}
 
     // -------------------------------------------------------------------------
-    std::unique_ptr<ASTNode> parseLine() {
+    inline std::vector<std::unique_ptr<ASTNode>> parseStatements() {
+        std::vector<std::unique_ptr<ASTNode>> statements;
+        while (peek().type != TokenType::EOFToken) {
+            if (peek().type == TokenType::Semicolon) {
+                advance();
+                continue;
+            }
+
+            // FIXME need a toggle command
+            if (Tools::gDumpStateNodes) {
+                Tools::printf("---------- new statement ------ Pos:%d \n", (int)pos);
+                for(size_t i = pos; i < tokens.size() ; i++) {
+                    Tools::printf("Token %d: %d :: %s\n", i, (int)tokens[i].type, tokenTypeToString(tokens[i].type));
+                }
+            }
+            size_t startIndex = pos;
+            auto stmt = parseLine();
+            if (Tools::gDumpStateNodes) {
+                Tools::printf("---------- LINE parsed ------ Pos:%d next:%d :: %s\n", (int)pos, (int)tokens[pos].type, tokenTypeToString(tokens[pos].type));
+            }
+            if (stmt) {
+                statements.push_back(std::move(stmt));
+            }
+            if (peek().type == TokenType::Semicolon) {
+                advance();
+            }
+            else if (pos == startIndex) {
+                Tools::errorf("Syntax-Error: Unexpected token '%s'\n", tokenTypeToString(tokens[pos].type));
+                advance();
+            }
+        }
+        return statements;
+    }
+
+    // -------------------------------------------------------------------------
+    inline std::unique_ptr<ASTNode> parseLine() {
 
         if (peek().type == TokenType::Fn) {
             advance(); //eat fn
@@ -182,6 +221,13 @@ public:
             return std::make_unique<ForStatement>(varName, std::move(start), std::move(end));
         }
         else
+        if (peek().type == TokenType::While) {
+            advance();
+            auto condition = parseComparison();
+            return std::make_unique<WhileStatement>(std::move(condition));
+        }
+
+        else
         if (peek().type == TokenType::End) {
             advance();
             return std::make_unique<FunctionDefineEndNode>();
@@ -207,6 +253,7 @@ public:
 
             if (peek().type != TokenType::EOFToken &&
                 peek().type != TokenType::End &&
+                peek().type != TokenType::Semicolon &&
                 peek().type != TokenType::RParen) {
                 rhs = parseComparison();
             }
@@ -215,7 +262,7 @@ public:
         }
         else
         if (peek().type == TokenType::Identifier) {
-            if (pos + 1 < tokens.size() && tokens[pos + 1].type == TokenType::Assign) {
+            if (peekNext().type == TokenType::Assign) {
                 std::string varName = advance().value;
                 advance(); // '='
                 auto rhs = parseComparison();
@@ -225,9 +272,6 @@ public:
 
         return parseComparison();
     }
-
-
-
 
 };
 } //namespace

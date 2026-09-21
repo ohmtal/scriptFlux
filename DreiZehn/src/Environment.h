@@ -22,21 +22,23 @@
 
 namespace DreiZehn {
 
-    enum class BlockType { Function, ForLoop };
+    enum class BlockType { Function, ForLoop, WhileLoop };
 
     struct OpenBlock {
         BlockType type;
         std::string funcName;
-        DreiZehn::ForStatement* forNodePointer;
+        BlockStatement* blockNodePointer;
     };
+
+
     enum class FlowSignal {
         None,
         Break,
         Return
     };
 
-    // moved to static so we have one pool
-    static std::vector<ValueObject*> gGarbageCollection;
+    // i need to track the current Env!
+    static Environment* gCurEnv = nullptr;
 
 class Environment {
 private:
@@ -44,10 +46,18 @@ private:
     std::unordered_map<std::string, Value> variables;
 
     // Garbage collection
+    std::vector<ValueObject*> mGarbageCollection;
     Environment* parent = nullptr;
 public:
     Environment() : parent(nullptr) {}
-    Environment(Environment* parentEnv) : parent(parentEnv) {}
+    Environment(Environment* parentEnv) : parent(parentEnv) {
+        gCurEnv = this;
+    }
+    ~Environment() {
+        doGarbageCollection();
+        if (parent) gCurEnv = parent;
+    }
+
     // -------------------------------------------------------------------------
 
     void setVariable(const std::string& name, Value val) {
@@ -80,19 +90,19 @@ public:
     // GarbageCollection
     // -------------------------------------------------------------------------
     void addToGarbageCollection(ValueObject* obj) {
-        gGarbageCollection.push_back(obj);
+        mGarbageCollection.push_back(obj);
     }
 
     void doGarbageCollection() {
-        for (auto* obj : gGarbageCollection) {
+        for (auto* obj : mGarbageCollection) {
             delete obj;
         }
-        gGarbageCollection.clear();
+        mGarbageCollection.clear();
     }
     // -------------------------------------------------------------------------
     // EXECUTE :D - currentEnv for function calls
     // -------------------------------------------------------------------------
-    inline DreiZehn::FlowSignal execute(ASTNode* node, Environment& currentEnv) {
+    inline FlowSignal execute(ASTNode* node, Environment& currentEnv) {
         if (!node) return FlowSignal::None;
 
         // --- Break Statement ---
@@ -123,6 +133,7 @@ public:
                 if (sig != FlowSignal::None) return sig;
             }
         }
+        // ---- for statement .....
         else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
             Value startVal = forStmt->startExpr->evaluate(currentEnv);
             Value endVal = forStmt->endExpr->evaluate(currentEnv);
@@ -152,7 +163,25 @@ public:
                 }
             }
         }
+        // ---- While statement .....
+        else if (auto* whileStmt = dynamic_cast<WhileStatement*>(node)) {
+            Environment loopEnv(&currentEnv);
 
+            auto checkCondition = [&]() -> bool {
+                Value condVal = whileStmt->mCondition->evaluate(loopEnv);
+                return (condVal.isInt() && condVal.asInt() != 0) ||
+                (condVal.isDouble() && condVal.asDouble() != 0.0);
+            };
+
+            while (checkCondition()) {
+                for (auto& statement : whileStmt->body) {
+                    FlowSignal sig = currentEnv.execute(statement.get(), loopEnv);
+
+                    if (sig == FlowSignal::Break) return FlowSignal::None;
+                    if (sig == FlowSignal::Return) return FlowSignal::Return;
+                }
+            }
+        }
         // --- others ---
         else if (auto* expr = dynamic_cast<Expression*>(node)) {
             expr->evaluate(currentEnv);

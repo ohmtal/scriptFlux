@@ -11,6 +11,8 @@
 
 namespace DreiZehn::Tools{
 
+    inline  bool gDumpStateNodes = false;
+
     // TODO should be redirectable
     inline void printf(const char *format, ...)
     {

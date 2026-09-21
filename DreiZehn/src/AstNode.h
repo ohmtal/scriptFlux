@@ -27,6 +27,12 @@ struct Expression : public ASTNode {
     virtual Value evaluate(Environment& env) = 0;
 };
 
+// block statement --------------------------------------------------------------
+class BlockStatement : public ASTNode {
+public:
+    std::vector<std::shared_ptr<ASTNode>> body;
+};
+
 
 // constants -------------------------------------------------------------------
 struct LiteralExpression : public Expression {
@@ -94,11 +100,10 @@ struct FunctionDefineStartNode : public ASTNode {
 struct FunctionDefineEndNode : public ASTNode {};
 
 // for -------------------------------------------------------------------------
-struct ForStatement : public ASTNode {
+struct ForStatement : public BlockStatement {
     std::string iteratorName;
     std::unique_ptr<Expression> startExpr;
     std::unique_ptr<Expression> endExpr;
-    std::vector<std::shared_ptr<ASTNode>> body;
 
     ForStatement(std::string name, std::unique_ptr<Expression> start, std::unique_ptr<Expression> end)
     : iteratorName(name), startExpr(std::move(start)), endExpr(std::move(end)) {}
@@ -108,7 +113,13 @@ struct BreakStatement : public ASTNode {};
 
 // return -------------------------------------------------------------------------
 struct ReturnStatement : public ASTNode {
-    std::unique_ptr<Expression> expression; // Kann nullptr sein bei "nacktem" return
+    std::unique_ptr<Expression> expression;
     ReturnStatement(std::unique_ptr<Expression> expr) : expression(std::move(expr)) {}
+};
+
+// While -------------------------------------------------------------------------
+struct WhileStatement : public BlockStatement {
+    std::unique_ptr<Expression> mCondition;
+    WhileStatement(std::unique_ptr<Expression> cond) : mCondition(std::move(cond)) {}
 };
 } //namespace

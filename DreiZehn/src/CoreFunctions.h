@@ -13,7 +13,6 @@ namespace DreiZehn {
 
 
     void RegisterCoreFunctions( Environment& env) {
-        std::srand(std::time(nullptr)); //setup random seed
 
         using namespace FunctionMap;
         // -------- print --------------
@@ -32,11 +31,6 @@ namespace DreiZehn {
                 }
             }
             Tools::printf("\n");
-            return true;
-        });
-        // -------- basic random --------------
-        RegisterFunction("random", [](std::vector<Value>& args, Value& ret) -> bool {
-            ret = Value(static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX));
             return true;
         });
 
@@ -92,6 +86,11 @@ namespace DreiZehn {
             return true;
         });
 
+        // ------------------------------------------
+        RegisterFunction("toggleDebug", [](std::vector<Value>& args, Value& ret) -> bool {
+            Tools::gDumpStateNodes = ! Tools::gDumpStateNodes;
+            return true;
+        });
         // ------------------------------------------
 
     } //RegisterCoreFunctions

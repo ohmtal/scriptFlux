@@ -11,4 +11,5 @@
 #include "Parser.h"
 #include "Tools.h"
 #include "CoreFunctions.h"
+#include "MathFunctions.h"
 

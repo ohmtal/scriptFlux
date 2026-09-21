@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+
 #include <vector>
 #include <cctype>
 #include "Tools.h"
@@ -33,8 +34,53 @@ enum class TokenType {
     // break, return
     , Break, Return
 
+    , Semicolon
+
+    , While
+
     , EOFToken
 };
+
+inline const char* tokenTypeToString(TokenType type) {
+    switch (type) {
+        case TokenType::Identifier:    return "Identifier";
+        case TokenType::Number:        return "Number";
+        case TokenType::Assign:        return "Assign";
+        case TokenType::StringLiteral: return "StringLiteral";
+        case TokenType::LParen:        return "LParen";
+        case TokenType::RParen:        return "RParen";
+
+        // math
+        case TokenType::Plus:          return "Plus";
+        case TokenType::Minus:         return "Minus";
+        case TokenType::Mul:           return "Mul";
+        case TokenType::Div:           return "Div";
+
+        // if ...
+        case TokenType::If:            return "If";
+        case TokenType::Greater:       return "Greater";
+        case TokenType::Less:          return "Less";
+        case TokenType::Equal:         return "Equal";
+        case TokenType::Else:          return "Else";
+
+        // fn functions
+        case TokenType::Fn:            return "Fn";
+        case TokenType::End:           return "End";
+
+        // for / while iter
+        case TokenType::For:           return "For";
+        case TokenType::While:         return "While";
+
+        // break, return
+        case TokenType::Break:         return "Break";
+        case TokenType::Return:        return "Return";
+
+        case TokenType::Semicolon:     return "Semicolon";
+        case TokenType::EOFToken:      return "EOFToken";
+
+        default:                       return "UnknownToken";
+    }
+}
 
 struct Token {
     TokenType type;
@@ -44,9 +90,11 @@ struct Token {
 class Lexer {
 private:
     std::string src;
-    size_t pos = 0;
+    int32_t pos = 0;
 
     char peek() { return pos < src.size() ? src[pos] : '\0'; }
+    char peekNext() { return pos+1 < src.size() ? src[pos + 1] : '\0'; }
+    char peekPrev() { return pos-1 > 0  ? src[pos - 1] : '\0'; }
     char advance() { return pos < src.size() ? src[pos++] : '\0'; }
 
 public:
@@ -72,7 +120,6 @@ public:
             if (peek() == '(') { advance(); tokens.push_back({TokenType::LParen, "("}); continue; }
             if (peek() == ')') { advance(); tokens.push_back({TokenType::RParen, ")"}); continue; }
             if (peek() == '+') { advance(); tokens.push_back({TokenType::Plus, "+"}); continue; }
-            if (peek() == '-') { advance(); tokens.push_back({TokenType::Minus, "-"}); continue; }
             if (peek() == '*') { advance(); tokens.push_back({TokenType::Mul,   "*"}); continue; }
             if (peek() == '/') { advance(); tokens.push_back({TokenType::Div,   "/"}); continue; }
 
@@ -83,21 +130,28 @@ public:
 
             // ----------------------------------------------------------------
             // Numbers
-            if (std::isdigit(peek()) || peek() == '.') {
+            //FIXME this can be optimized!
+            if ( std::isdigit(peek())
+                || (!std::isdigit(peekPrev()) && peek() == '-' && std::isdigit(peekNext()))
+                || (std::isdigit(peekPrev()) && peek() == '.' && std::isdigit(peekNext()))
+            ){
                 std::string num;
-                while (std::isdigit(peek()) || peek() == '.') {
+                while (std::isdigit(peek()) || peek() == '.' || peek() == '-') {
                     num += advance();
                 }
                 tokens.push_back({TokenType::Number, num});
                 continue;
             }
 
+            // minus after number
+            if (peek() == '-') { advance(); tokens.push_back({TokenType::Minus, "-"}); continue; }
+
             // ----------------------------------------------------------------
-            // Identifier and Keywords scannen
-            if (std::isalpha(peek()) || peek() == '_') {
+            // Identifier and Keywords scan
+            if (std::isalpha(peek()) || peek() == '_' || peek() == '.' || peek() == ':') {
                 std::string id;
 
-                while (std::isalnum(peek()) || peek() == '_') {
+                while (std::isalnum(peek()) || peek() == '_' || peek() == '.' || peek() == ':') {
                     id += advance();
                 }
 
@@ -108,6 +162,7 @@ public:
                 else if (id == "for") { tokens.push_back({TokenType::For, "for"});  }
                 else if (id == "break") { tokens.push_back({TokenType::Break, "break"});  }
                 else if (id == "return") { tokens.push_back({TokenType::Return, "return"});  }
+                else if (id == "while") { tokens.push_back({TokenType::While, "while"});  }
                 else {
                     tokens.push_back({TokenType::Identifier, id});
                 }
@@ -145,6 +200,8 @@ public:
                 continue;
             }
 
+
+            if (peek() == ';') { advance(); tokens.push_back({TokenType::Semicolon, ";"}); continue; }
 
             advance(); // skip unknown
         }

@@ -6,5 +6,6 @@
 
 namespace DreiZehn {
     class Environment;
+    bool RunScriptStream(std::istream& stream, Environment& env);
     bool RunScriptFile(const std::string& filename, Environment& env);
 }
