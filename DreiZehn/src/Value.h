@@ -65,4 +65,5 @@ public:
         return std::bit_cast<void*>(ptrBits);
     }
 };
+
 } //namespace

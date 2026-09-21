@@ -19,9 +19,13 @@ set(PROJECT_SRC
     src/Lexer.h
     src/Parser.h
     src/AstNode.h
+    src/AstNode.cpp
     src/Environment.h
     src/Tools.h
     src/CoreFunctions.h
+
+    src/ScriptLoader.h
+    src/ScriptLoader.cpp
 
     src/DreiZehn.h
 

@@ -1,0 +1,140 @@
+# DreiZehn Scripting Language Syntax & Documentation
+
+A lightweight, high-performance embedded scripting language built from scratch in C++. 
+
+## Core Architecture
+* **NaN-Boxing Representation:** All variables, primitives (`int32_t`, `double`), and managed pointers (`void*`/`Object*`) are packed into a highly efficient **8-byte single-register** memory footprint.
+* **Lexer & Recursive Descent Parser:** Generates a dynamic Abstract Syntax Tree (AST) with mathematical operator precedence.
+* **Nested Execution Environment:** Supports local variable scoping (`localEnv`) with parent-lookup optimization, allowing independent memory spaces for loops and function calls.
+
+---
+
+## 1. Data Types & Literals
+
+The language automatically infers types during runtime evaluations.
+
+```script
+# Integers and Floating-Point numbers (Doubles)
+x = 5
+y = 3.1415
+
+# String Literals (Dynamically allocated and tracked by Garbage Collection)
+message = "Hello World"
+```
+
+---
+
+## 2. Variables & Assignment
+
+Variables are dynamically typed and stored in the active environment. Assigning a value updates the local scope.
+
+```script
+speed = 100
+multiplier = 2
+total_speed = speed * multiplier
+```
+
+---
+
+## 3. Mathematical & Logical Expressions
+
+Expressions support standard operator precedence, comparison routing, and recursive parenthesis grouping `()`.
+
+```script
+# Math operations
+result = (5 + 5) * 2 - 1
+
+# Comparison operators (Return 1 for True, 0 for False)
+is_greater = 10 > 5
+is_equal = x == 5
+```
+
+---
+
+## 4. Control Flow (Conditional Statements)
+
+Conditional logic evaluates any non-zero integer or double as `true`. Block contents are executed sequentially.
+
+```script
+if x > 5
+    print "Value is greater than 5"
+end
+
+if status == 1
+    y = x + 10
+    print y
+end
+```
+
+---
+
+## 5. Loops & Iteration (For Statement)
+
+The `for` loop introduces an isolated nested environment. Loop iterators are local and automatically cleaned up upon exit. Supports safe early termination via `break`.
+
+```script
+# Simple increment loop (Start to End, inclusive)
+for i 1 5
+    print i
+end
+
+# Loop with early break conditions
+for i 1 100
+    if i == 5
+        print "Target reached, breaking loop."
+        break
+    end
+end
+```
+
+---
+
+## 6. User-Defined Functions
+
+Functions parse their AST blocks exactly once and run them on demand inside a private variable scope. Parameters are bound dynamically at call-time. Supports immediate execution halts and expression pipe-backs via `return`.
+
+```script
+# Function definition with arguments
+fn calculate_bonus score factor
+    if score < 50
+        return 0 # Early exit with return value
+    end
+    
+    result = score * factor
+    return result
+end
+
+# Invoking script functions and storing the return value
+my_bonus = calculate_bonus 85 2
+print my_bonus
+```
+
+---
+
+## 7. Built-in Utility Functions
+
+### `print`
+Outputs an arbitrary list of space-separated variables, literals, or expressions via the abstract `Tools::printf` pipeline.
+```script
+print "Result is:" (5 + 5)
+```
+
+### `concat`
+A flexible string-concatenation utility that merges strings, ints, and doubles into a newly allocated, GC-tracked string object.
+```script
+log = concat "Iteration: " i " - Value: " x
+print log
+```
+
+### `run`
+Loads, parses, and executes an external script file line-by-line.
+```script
+run "test_suite.13"
+```
+
+---
+
+## 8. Built-in Safety Features
+* **Infinite Loop Prevention:** Parser-level locks intercept stalled index trackers and throw non-blocking compiler alerts.
+* **String Memory Safety:** The lexer forces automatic emergency lookbehinds on unclosed string sequences (`"hello...`) to prevent state corruption.
+* **Garbage Collection (GC):** `Environment::shutdown()` walks through all dynamically tracked memory nodes upon exit to prevent memory leaks in the host C++ application.

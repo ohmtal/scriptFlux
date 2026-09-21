@@ -18,32 +18,49 @@
 #include "Value.h"
 #include "AstNode.h"
 #include "Tools.h"
+#include "FunctionMap.h"
 
 namespace DreiZehn {
 
-using CallBack =  std::function< bool (std::vector<Value>&, Value& )>;
-using FuncLookupMap = std::unordered_map<std::string, CallBack>;
+    enum class BlockType { Function, ForLoop };
+
+    struct OpenBlock {
+        BlockType type;
+        std::string funcName;
+        DreiZehn::ForStatement* forNodePointer;
+    };
+    enum class FlowSignal {
+        None,
+        Break,
+        Return
+    };
 
 class Environment {
 private:
-
     // variables stack
-    std::unordered_map<std::string, Value> mVariables;
+    std::unordered_map<std::string, Value> variables;
 
     // Garbage collection
     std::vector<ValueObject*> mGarbageCollection;
-
-    // Functions
-    FuncLookupMap registeredFunctions;
-
+    Environment* parent = nullptr;
 public:
+    Environment() : parent(nullptr) {}
+    Environment(Environment* parentEnv) : parent(parentEnv) {}
     // -------------------------------------------------------------------------
-    // Function Registry
-    // -------------------------------------------------------------------------
-    void registerFunction(const std::string& name, CallBack cb) {
-        registeredFunctions[name] = cb;
+    void setVariable(const std::string& name, Value val) {
+        variables[name] = val;
     }
 
+    Value getVariable(const std::string& name) {
+        if (variables.find(name) != variables.end()) {
+            return variables.at(name);
+        }
+        if (parent != nullptr) {
+            return parent->getVariable(name); // Suche im globalen Scope
+        }
+        Tools::errorf("Variable not found: %s\n", name.c_str());
+        return Value();
+    }
     // -------------------------------------------------------------------------
     // GarbageCollection
     // -------------------------------------------------------------------------
@@ -58,74 +75,125 @@ public:
         mGarbageCollection.clear();
     }
     // -------------------------------------------------------------------------
-    // resolve the token to value
-
-    Value resolve(const std::string& tokenStr) {
-        // a String-Literal ?
-        if (tokenStr.size() >= 2 && tokenStr.front() == '"' && tokenStr.back() == '"') {
-            // clean string again
-            std::string cleanStr = tokenStr.substr(1, tokenStr.size() - 2);
-            StringValueObject* strObj = new StringValueObject(cleanStr);
-            addToGarbageCollection(strObj);
-            return Value(strObj);
-        }
-
-        // Variable?
-        if (mVariables.find(tokenStr) != mVariables.end()) {
-            return mVariables.at(tokenStr);
-        }
-
-        // Number
-        if (tokenStr.find('.') != std::string::npos) {
-            return Value(std::stod(tokenStr));
-        }
-        // INT
-        if (!tokenStr.empty() && std::all_of(tokenStr.begin(), tokenStr.end(), ::isdigit)) {
-            return Value(std::stoi(tokenStr));
-        }
-
-        // Fallback: Error
-        Tools::errorf("[Runtime-Error] Unknown Symbol: %s\n", tokenStr.c_str());
-        return Value();
-    }
-
+    // EXECUTE :D - currentEnv for function calls
     // -------------------------------------------------------------------------
-    // Here we go ...
-    void execute(ASTNode* node) {
-        if (!node) return;
+    inline DreiZehn::FlowSignal execute(ASTNode* node, Environment& currentEnv) {
+        if (!node) return FlowSignal::None;
 
-        // Assign
-        if (auto* assign = dynamic_cast<AssignNode*>(node)) {
-            mVariables[assign->varName] = resolve(assign->valueStr);
-            //FIXME DEBUG STUFF std::cout << "[Runtime] Variable '" << assign->varName << "' set.\n";
+        // --- Break Statement ---
+        if (dynamic_cast<BreakStatement*>(node)) {
+            return FlowSignal::Break;
         }
 
-        else
-        // Command
-            if (auto* cmd = dynamic_cast<CommandNode*>(node)) {
-                // Args
-                std::vector<Value> evalArgs;
-                for (const auto& argStr : cmd->args) {
-                    evalArgs.push_back(resolve(argStr));
-                }
+        // --- Return Statement ---
+        if (auto* retStmt = dynamic_cast<ReturnStatement*>(node)) {
+            if (retStmt->expression) {
+                Value retVal = retStmt->expression->evaluate(currentEnv);
+                currentEnv.setVariable("__return_value__", retVal);
+            }
+            return FlowSignal::Return;
+        }
 
-                // function lookup
-                if (registeredFunctions.find(cmd->cmdName) != registeredFunctions.end()) {
-                    Value returnValue;
-                    bool success = registeredFunctions[cmd->cmdName](evalArgs, returnValue);
+        // --- Assign ---
+        if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
+            currentEnv.setVariable(assign->varName, assign->rhs->evaluate(currentEnv));
+        }
+        // --- If-Statement  ---
+        else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
+            Value condVal = ifStmt->condition->evaluate(currentEnv);
+            bool isTrue = (condVal.isInt() && condVal.asInt() != 0) || (condVal.isDouble() && condVal.asDouble() != 0.0);
 
-                    if (!success) {
-                        Tools::errorf("Command error at: %s\n", cmd->cmdName.c_str());
-                    }
+            if (isTrue) {
+                FlowSignal sig = execute(ifStmt->thenBranch.get(), currentEnv);
+                if (sig != FlowSignal::None) return sig;
+            }
+        }
+        else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
+            Value startVal = forStmt->startExpr->evaluate(currentEnv);
+            Value endVal = forStmt->endExpr->evaluate(currentEnv);
 
-                    //TODO use the result of the return value
-                }
-                else {
-                    Tools::errorf("Unknown Command: %s\n", cmd->cmdName.c_str());
-                }
+            if (!startVal.isInt() || !endVal.isInt()) {
+                Tools::errorf("Error: 'for'-loop only support integer borders\n");
+                return FlowSignal::None;
             }
 
-    } // execute
+            int start = startVal.asInt();
+            int end = endVal.asInt();
+
+            Environment loopEnv(&currentEnv);
+
+            for (int i = start; i <= end; ++i) {
+                loopEnv.setVariable(forStmt->iteratorName, Value(i));
+
+                for (auto& statement : forStmt->body) {
+                    FlowSignal sig = currentEnv.execute(statement.get(), loopEnv);
+
+                    if (sig == FlowSignal::Break) {
+                        return FlowSignal::None;
+                    }
+                    if (sig == FlowSignal::Return) {
+                        return FlowSignal::Return;
+                    }
+                }
+            }
+        }
+
+        // --- others ---
+        else if (auto* expr = dynamic_cast<Expression*>(node)) {
+            expr->evaluate(currentEnv);
+        }
+
+        return FlowSignal::None;
+    }
+
+    // void execute(ASTNode* node, Environment& currentEnv) {
+    //     if (!node) return;
+    //
+    //     if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
+    //         currentEnv.setVariable(assign->varName, assign->rhs->evaluate(currentEnv));
+    //     }
+    //     else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
+    //         Value condVal = ifStmt->condition->evaluate(currentEnv);
+    //
+    //         bool isTrue = false;
+    //         if (condVal.isInt() && condVal.asInt() != 0) isTrue = true;
+    //         if (condVal.isDouble() && condVal.asDouble() != 0.0) isTrue = true;
+    //
+    //         if (isTrue) {
+    //             execute(ifStmt->thenBranch.get(), currentEnv);
+    //         }
+    //     }
+    //     else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
+    //         Value startVal = forStmt->startExpr->evaluate(currentEnv);
+    //         Value endVal = forStmt->endExpr->evaluate(currentEnv);
+    //
+    //         if (!startVal.isInt() || !endVal.isInt()) {
+    //             Tools::errorf("Error: 'for'-loop only support integer borders\n");
+    //             return;
+    //         }
+    //
+    //         int start = startVal.asInt();
+    //         int end = endVal.asInt();
+    //
+    //         Environment loopEnv(&currentEnv);
+    //
+    //         for (int i = start; i <= end; ++i) {
+    //             loopEnv.setVariable(forStmt->iteratorName, Value(i));
+    //
+    //             for (auto& statement : forStmt->body) {
+    //                 currentEnv.execute(statement.get(), loopEnv);
+    //             }
+    //         }
+    //     }
+    //     else if (auto* expr = dynamic_cast<Expression*>(node)) {
+    //         expr->evaluate(currentEnv);
+    //     }
+    // }
+    // -------------------------------------------------------------------------
+    // main execute
+    void execute(ASTNode* node) {
+         execute(node, *this);
+    }
     // -------------------------------------------------------------------------
     void shutDown() {
         doGarbageCollection();

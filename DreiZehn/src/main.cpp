@@ -4,31 +4,92 @@
 #include "DreiZehn.h"
 
 
+
 int main() {
-
     using namespace DreiZehn;
-
     Environment env;
     RegisterCoreFunctions(env);
 
+    // special i need env here !! ----------------------------------------------
+    // -------------------------------------------------------------------------
     std::string line;
 
-    Tools::printf("DreiZehn CLI ready.\n");
+    std::vector<OpenBlock> blockStack;
+
     while (true) {
-        Tools::printf ("> ");
+        for (size_t i = 0; i < blockStack.size(); ++i) std::cout << ".. ";
+        std::cout << (blockStack.empty() ? "> " : "");
+
         std::getline(std::cin, line);
         if (line == "exit") break;
 
-        // 1. Lexer
         Lexer lexer(line);
         auto tokens = lexer.tokenize();
-
-        // 2. Parser
         Parser parser(tokens);
         auto ast = parser.parseLine();
 
-        // 3. Evaluator
-        env.execute(ast.get());
+        if (!ast) continue;
+
+        if (auto* startNode = dynamic_cast<FunctionDefineStartNode*>(ast.get())) {
+            blockStack.push_back({BlockType::Function, startNode->name, nullptr});
+            Tools::printf("compile function '%s'...\n", startNode->name.c_str());
+            continue;
+        }
+
+        if (auto* forNode = dynamic_cast<ForStatement*>(ast.get())) {
+            std::shared_ptr<ASTNode> sharedBase = std::move(ast);
+            std::shared_ptr<ForStatement> sharedFor = std::static_pointer_cast<ForStatement>(sharedBase);
+
+            blockStack.push_back({BlockType::ForLoop, "", sharedFor.get()});
+
+            if (blockStack.size() > 1) {
+                auto& outerBlock = blockStack[blockStack.size() - 2];
+                if (outerBlock.type == BlockType::Function) {
+                    FunctionMap::RegisteredScriptFunctions[outerBlock.funcName].body.push_back(sharedFor);
+                } else if (outerBlock.type == BlockType::ForLoop) {
+                    outerBlock.forNodePointer->body.push_back(sharedFor);
+                }
+            } else {
+                static std::unordered_map<ForStatement*, std::shared_ptr<ForStatement>> globalForKeeper;
+                globalForKeeper[sharedFor.get()] = sharedFor;
+            }
+            continue;
+        }
+
+        if (dynamic_cast<FunctionDefineEndNode*>(ast.get())) {
+            if (blockStack.empty()) {
+                Tools::errorf("Syntax-Error: 'end' without for / fn.\n");
+                continue;
+            }
+
+            OpenBlock closingBlock = blockStack.back();
+            blockStack.pop_back();
+
+            if (closingBlock.type == BlockType::Function) {
+                Tools::printf("function '%s' registered.\n", closingBlock.funcName.c_str());
+            }
+            else if (closingBlock.type == BlockType::ForLoop) {
+                if (blockStack.empty()) {
+                    env.execute(closingBlock.forNodePointer);
+                }
+            }
+            continue;
+        }
+
+        if (!blockStack.empty()) {
+            auto& currentBlock = blockStack.back();
+            std::shared_ptr<ASTNode> sharedAst = std::move(ast);
+
+            if (currentBlock.type == BlockType::Function) {
+                FunctionMap::RegisteredScriptFunctions[currentBlock.funcName].body.push_back(sharedAst);
+            }
+            else if (currentBlock.type == BlockType::ForLoop) {
+                currentBlock.forNodePointer->body.push_back(sharedAst);
+            }
+        }
+        else {
+            env.execute(ast.get());
+        }
     }
     env.shutDown();
     return 0;
@@ -36,60 +97,58 @@ int main() {
 
 
 
-// ===================================================================================
-// #include "Value.h"
-// #include "ValueObject.h"
-// void testValue(const std::vector<Value>& args) {
-//     for (const auto& val : args) {
-//         if (val.isInt()) {
-//             std::cout << "Int : " << val.asInt() << "\n";
-//         } else if (val.isDouble()) {
-//             std::cout << "Double : " << val.asDouble() << "\n";
-//         // } else if (arg.isPointer()) {
-//         //     std::cout << "Pointer : " << arg.asPointer() << "\n";
-//         // }
-//         } else if (val.isPointer()) {
-//             ValueObject* obj = static_cast<ValueObject*>(val.asPointer());
+// int main() {
 //
-//             if (obj->type == ValueObjectType::String) {
-//                 auto* strObj = static_cast<StringValueObject*>(obj);
-//                 std::cout << "String: " << strObj->value << "\n";
-//             }
-//             else
-//                 std::cout << "Pointer : " << val.asPointer() << "\n";
+//     using namespace DreiZehn;
+//
+//     Environment env;
+//     RegisterCoreFunctions(env);
+//
+//     std::string line;
+//     bool isRecordingFunction = false;
+//     std::string currentRecordingFuncName = "";
+//
+//     Tools::printf("DreiZehn CLI ready.\n");
+//     while (true) {
+//         Tools::printf (isRecordingFunction ? ".. " : "> ");
+//         std::getline(std::cin, line);
+//         if (line == "exit") break;
+//
+//         // 1. Lexer
+//         Lexer lexer(line);
+//         auto tokens = lexer.tokenize();
+//
+//         // 2. Parser
+//         Parser parser(tokens);
+//         auto ast = parser.parseLine();
+//
+//         if (!ast) continue;
+//
+//         //NOTE  special handline for fn input!!!
+//         if (auto* startNode = dynamic_cast<FunctionDefineStartNode*>(ast.get())) {
+//             isRecordingFunction = true;
+//             currentRecordingFuncName = startNode->name;
+//             Tools::printf("Compile function: '%s'...\n", currentRecordingFuncName.c_str());
+//             continue;
+//         }
+//
+//         if (dynamic_cast<FunctionDefineEndNode*>(ast.get())) {
+//             Tools::printf("function '%s' registered.\n", currentRecordingFuncName.c_str());
+//             isRecordingFunction = false;
+//             currentRecordingFuncName = "";
+//             continue;
+//         }
+//
+//         if (isRecordingFunction) {
+//             auto& func = FunctionMap::RegisteredScriptFunctions[currentRecordingFuncName];
+//             func.body.push_back(std::move(ast));
+//         }
+//         else {
+//             env.execute(ast.get());
 //         }
 //     }
-// }
-//
-// int main() {
-//     printf("DreiZehn Ready,\n");
-//
-//
-//     // ----
-//     Value v1 = 42;          // Integer
-//
-//     Value v2 = 3.1415;      // Double
-//
-//     StringValueObject strObj = StringValueObject("Hello DreiZehn");
-//     Value v3 = &strObj;
-//
-//     int foo = 4711;
-//     UserdataValueObject fooObj = UserdataValueObject(&foo);
-//     Value v4 = &fooObj;
-//
-//     std::vector<Value> args = {v1, v2, v3, v4};
-//     testValue(args);
-//
-//     // ----
-//
-//     // ============ MAIN LOOP ============
-//     std::string code;
-//     while (true) {
-//         std::cout << "> ";
-//         std::getline(std::cin, code);
-//         if (code == "exit") break;  // Exit command
-//
-//     }
-//
+//     env.shutDown();
 //     return 0;
 // }
+//
+//

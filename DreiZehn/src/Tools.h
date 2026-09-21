@@ -12,7 +12,7 @@
 namespace DreiZehn::Tools{
 
     // TODO should be redirectable
-    void printf(const char *format, ...)
+    inline void printf(const char *format, ...)
     {
         va_list args;
         va_start(args, format);
@@ -20,7 +20,7 @@ namespace DreiZehn::Tools{
         va_end(args);
     }
 
-    void errorf(const char *format, ...)
+    inline void errorf(const char *format, ...)
     {
         va_list args;
         va_start(args, format);
