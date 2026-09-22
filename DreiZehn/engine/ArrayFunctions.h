@@ -15,7 +15,7 @@
 namespace DreiZehn {
 
     struct ArrayValueObject : public ValueObject {
-        std::vector<Value> elements;
+        std::vector<Value> mElements;
         ArrayValueObject() : ValueObject(ValueObjectType::Userdata) {}
         ~ArrayValueObject() = default;
 
@@ -24,16 +24,16 @@ namespace DreiZehn {
 
             if (methodName == "push") {
                 if (args.size() != 1 ) return false;
-                elements.push_back(args[0]);
+                mElements.push_back(args[0]);
                 ret = Value(args[0]);
                 return true;
             }
             else
             if (methodName == "pop") {
                 if (args.size() != 0 ) return false;
-                if (elements.size() > 0) {
-                    ret = Value(elements.back());
-                    elements.pop_back();
+                if (mElements.size() > 0) {
+                    ret = Value(mElements.back());
+                    mElements.pop_back();
                 } else {
                     ret= Value();
                 }
@@ -42,21 +42,21 @@ namespace DreiZehn {
             else
             if (methodName == "size") {
                 if (args.size() != 0 ) return false;
-                ret = Value(static_cast<int>(elements.size()));
+                ret = Value(static_cast<int>(mElements.size()));
                 return true;
             }
             else
             if (methodName == "get" || methodName == "at") {
                 if (args.size() != 1) return false;
-                if (elements.size() > args[0].getInt()) {
-                    ret = Value(elements.at(args[0].getInt()));
+                if (mElements.size() > args[0].getInt()) {
+                    ret = Value(mElements.at(args[0].getInt()));
                 }
                 return true;
             }
             else
             if (methodName == "set") {
-                if (args.size() != 2 || elements.size() <= args[0].getInt()) return false;
-                elements[args[0].getInt()] = args[1];
+                if (args.size() != 2 || mElements.size() <= args[0].getInt()) return false;
+                mElements[args[0].getInt()] = args[1];
                 ret =  args[1];
                 return true;
             }
@@ -84,7 +84,7 @@ namespace DreiZehn {
             auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
             if (!arr) return false;
 
-            arr->elements.push_back(args[1]);
+            arr->mElements.push_back(args[1]);
             ret = args[1];
             return true;
         });
@@ -97,9 +97,9 @@ namespace DreiZehn {
             auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
             if (!arr) return false;
 
-            if (arr->elements.size() > 0) {
-                ret = Value(arr->elements.back());
-                arr->elements.pop_back();
+            if (arr->mElements.size() > 0) {
+                ret = Value(arr->mElements.back());
+                arr->mElements.pop_back();
             } else {
                 ret= Value();
             }
@@ -111,7 +111,7 @@ namespace DreiZehn {
             auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
             if (!arr) return false;
 
-            ret = Value(static_cast<double>(arr->elements.size()));
+            ret = Value(static_cast<double>(arr->mElements.size()));
             return true;
         });
 
@@ -121,12 +121,12 @@ namespace DreiZehn {
             auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
             int idx = static_cast<int>(args[1].getDouble());
 
-            if (!arr || idx < 0 || idx >= static_cast<int>(arr->elements.size())) {
+            if (!arr || idx < 0 || idx >= static_cast<int>(arr->mElements.size())) {
                 Tools::errorf("Array.get: Index out of bounds oder ungültiges Array\n");
                 return false;
             }
 
-            ret = arr->elements[idx];
+            ret = arr->mElements[idx];
             return true;
         });
 
@@ -136,12 +136,12 @@ namespace DreiZehn {
             auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
             int idx = static_cast<int>(args[1].getDouble());
 
-            if (!arr || idx < 0 || idx >= static_cast<int>(arr->elements.size())) {
+            if (!arr || idx < 0 || idx >= static_cast<int>(arr->mElements.size())) {
                 Tools::errorf("Array.set: Index out of bounds\n");
                 return false;
             }
 
-            arr->elements[idx] = args[2];
+            arr->mElements[idx] = args[2];
             ret = args[2];
             return true;
         });

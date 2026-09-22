@@ -125,24 +125,24 @@ public:
 
         // --- Assign ---
         if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
-            currentEnv.setVariable(assign->varName, assign->rhs->evaluate(currentEnv));
+            currentEnv.setVariable(assign->mVarName, assign->mRhs->evaluate(currentEnv));
         }
         // --- If-Statement  ---
         else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
-            Value condVal = ifStmt->condition->evaluate(currentEnv);
+            Value condVal = ifStmt->mCondition->evaluate(currentEnv);
 
             double condNum = condVal.getDouble();
             const double EPSILON = 1e-9;
             bool isTrue = std::abs(condNum) > EPSILON;
 
             if (isTrue) {
-                for (auto& childNode : ifStmt->body) {
+                for (auto& childNode : ifStmt->mBody) {
                     if (!childNode) continue;
                     FlowSignal sig = execute(childNode.get(), currentEnv);
                     if (sig != FlowSignal::None) return sig;
                 }
             } else {
-                for (auto& childNode : ifStmt->elseBody) {
+                for (auto& childNode : ifStmt->mElseBody) {
                     if (!childNode) continue;
                     FlowSignal sig = execute(childNode.get(), currentEnv);
                     if (sig != FlowSignal::None) return sig;
@@ -167,9 +167,9 @@ public:
             Environment loopEnv(&currentEnv);
 
             for (int i = start; i <= end; ++i) {
-                loopEnv.setVariable(forStmt->iteratorName, Value(i));
+                loopEnv.setVariable(forStmt->mIteratorVarName, Value(i));
 
-                for (auto& statement : forStmt->body) {
+                for (auto& statement : forStmt->mBody) {
                     FlowSignal sig = currentEnv.execute(statement.get(), loopEnv);
 
                     if (sig == FlowSignal::Break) {
@@ -192,7 +192,7 @@ public:
             };
 
             while (checkCondition()) {
-                for (auto& statement : whileStmt->body) {
+                for (auto& statement : whileStmt->mBody) {
                     FlowSignal sig = currentEnv.execute(statement.get(), loopEnv);
 
                     if (sig == FlowSignal::Break) return FlowSignal::None;

@@ -29,16 +29,16 @@ struct Expression : public ASTNode {
 // block statement --------------------------------------------------------------
 class BlockStatement : public ASTNode {
 public:
-    std::vector<std::shared_ptr<ASTNode>> body;
+    std::vector<std::shared_ptr<ASTNode>> mBody;
 };
 
 
 // constants -------------------------------------------------------------------
 struct LiteralExpression : public Expression {
-    TokenType type;
-    std::string rawValue;
+    TokenType mType;
+    std::string mRawValue;
 
-    LiteralExpression(TokenType t, std::string val) : type(t), rawValue(std::move(val)) {}
+    LiteralExpression(TokenType t, std::string val) : mType(t), mRawValue(std::move(val)) {}
 
     Value evaluate(Environment& env) override;
 };
@@ -56,68 +56,68 @@ struct ValueExpression : public Expression {
 
 // Variables -------------------------------------------------------------------
 struct VariableExpression : public Expression {
-    std::string name;
-    VariableExpression(std::string n) : name(n) {}
+    std::string mName;
+    VariableExpression(std::string n) : mName(n) {}
     Value evaluate(Environment& env) override; // Liest aus env.variables
 };
 
 // function calls --------------------------------------------------------------
 struct CallExpression : public Expression {
-    std::string funcName;
+    std::string mFuncName;
     std::vector<std::unique_ptr<Expression>> arguments;
 
     CallExpression(std::string name, std::vector<std::unique_ptr<Expression>> args)
-    : funcName(name), arguments(std::move(args)) {}
+    : mFuncName(name), arguments(std::move(args)) {}
 
     Value evaluate(Environment& env) override;
 };
 
 // method/field on Pointer  calls --------------------------------------------------------------
 struct MethodExpression : public Expression {
-    std::string pointerName;
-    std::string methodName;
-    std::vector<std::unique_ptr<Expression>> arguments;
+    std::string mPointerName;
+    std::string mMethodName;
+    std::vector<std::unique_ptr<Expression>> mArguments;
 
     MethodExpression(std::string PointerName,std::string MethodName, std::vector<std::unique_ptr<Expression>> args)
-    : pointerName(PointerName), methodName(MethodName), arguments(std::move(args)) {}
+    : mPointerName(PointerName), mMethodName(MethodName), mArguments(std::move(args)) {}
 
     Value evaluate(Environment& env) override;
 };
 // Assingment ------------------------------------------------------------------
 struct AssignStatement : public ASTNode {
-    std::string varName;
-    std::unique_ptr<Expression> rhs; // Right-Hand Side
+    std::string mVarName;
+    std::unique_ptr<Expression> mRhs; // Right-Hand Side
 
     AssignStatement(std::string name, std::unique_ptr<Expression> expr)
-    : varName(name), rhs(std::move(expr)) {}
+    : mVarName(name), mRhs(std::move(expr)) {}
 };
 // Binary ----------------------------------------------------------------------
 struct BinaryExpression : public Expression {
-    std::unique_ptr<Expression> left;
-    TokenType op;
-    std::unique_ptr<Expression> right;
+    std::unique_ptr<Expression> mLeft;
+    TokenType mOp;
+    std::unique_ptr<Expression> mRight;
 
     BinaryExpression(std::unique_ptr<Expression> l, TokenType o, std::unique_ptr<Expression> r)
-    : left(std::move(l)), op(o), right(std::move(r)) {}
+    : mLeft(std::move(l)), mOp(o), mRight(std::move(r)) {}
 
     Value evaluate(Environment& env) override;
 };
 // If -------------------------------------------------------------------------
 // struct IfStatement : public ASTNode {
 struct IfStatement : public BlockStatement {
-    std::unique_ptr<Expression> condition;
+    std::unique_ptr<Expression> mCondition;
     // body is defined in BlockStatement
-    std::vector<std::shared_ptr<ASTNode>> elseBody;
+    std::vector<std::shared_ptr<ASTNode>> mElseBody;
      bool mIsInElseBranch = false;
 
-    IfStatement(std::unique_ptr<Expression> cond) : condition(std::move(cond)) {}
+    IfStatement(std::unique_ptr<Expression> cond) : mCondition(std::move(cond)) {}
 
 };
 struct ElseMarkerNode: public ASTNode {};
 // fn --------------------------------------------------------------------------
 struct FunctionDefineStartNode : public ASTNode {
-    std::string name;
-    FunctionDefineStartNode(std::string n) : name(n) {}
+    std::string mFnName;
+    FunctionDefineStartNode(std::string n) : mFnName(n) {}
 };
 
 // end -------------------------------------------------------------------------
@@ -125,12 +125,12 @@ struct FunctionDefineEndNode : public ASTNode {};
 
 // for -------------------------------------------------------------------------
 struct ForStatement : public BlockStatement {
-    std::string iteratorName;
+    std::string mIteratorVarName;
     std::unique_ptr<Expression> startExpr;
     std::unique_ptr<Expression> endExpr;
 
     ForStatement(std::string name, std::unique_ptr<Expression> start, std::unique_ptr<Expression> end)
-    : iteratorName(name), startExpr(std::move(start)), endExpr(std::move(end)) {}
+    : mIteratorVarName(name), startExpr(std::move(start)), endExpr(std::move(end)) {}
 };
 // break -------------------------------------------------------------------------
 struct BreakStatement : public ASTNode {};

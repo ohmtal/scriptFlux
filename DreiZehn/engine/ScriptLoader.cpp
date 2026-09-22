@@ -64,7 +64,7 @@ namespace DreiZehn {
 
                 // --- fn ---
                 if (auto* startNode = dynamic_cast<FunctionDefineStartNode*>(ast.get())) {
-                    blockStack.push_back({BlockType::Function, startNode->name, nullptr});
+                    blockStack.push_back({BlockType::Function, startNode->mFnName, nullptr});
                     continue;
                 }
 
@@ -96,18 +96,18 @@ namespace DreiZehn {
                         else if (outerBlock.mType == BlockType::ForLoop) {
                             auto* actualFor = dynamic_cast<ForStatement*>(outerBlock.mBlockNodePointer);
                             if (actualFor) {
-                                actualFor->body.push_back(sharedLoop);
+                                actualFor->mBody.push_back(sharedLoop);
                             }
                         }
                         else if (outerBlock.mType == BlockType::WhileLoop) {
                             auto* actualWhile = dynamic_cast<WhileStatement*>(outerBlock.mBlockNodePointer);
                             if (actualWhile) {
-                                actualWhile->body.push_back(sharedLoop);
+                                actualWhile->mBody.push_back(sharedLoop);
                             }
                         }
                         else if (outerBlock.mType == BlockType::IfBlock) {
                             auto* actualIf = dynamic_cast<IfStatement*>(outerBlock.mBlockNodePointer);
-                            if (actualIf) actualIf->body.push_back(sharedBase);
+                            if (actualIf) actualIf->mBody.push_back(sharedBase);
                         }
                     } else {
                         // IMPORTANT: keep the "shared_ptr" pointer alive:
@@ -158,14 +158,14 @@ namespace DreiZehn {
                     if (currentBlock.mType == BlockType::Function) {
                         FunctionMap::RegisteredScriptFunctions[currentBlock.mFuncName].body.push_back(sharedAst);
                     } else if (currentBlock.mType == BlockType::ForLoop || currentBlock.mType == BlockType::WhileLoop) {
-                        currentBlock.mBlockNodePointer->body.push_back(sharedAst);
+                        currentBlock.mBlockNodePointer->mBody.push_back(sharedAst);
                     } else if (currentBlock.mType == BlockType::IfBlock) {
                         auto* actualIf = dynamic_cast<IfStatement*>(currentBlock.mBlockNodePointer);
                         if (actualIf) {
                             if (actualIf->mIsInElseBranch) {
-                                actualIf->elseBody.push_back(sharedAst);
+                                actualIf->mElseBody.push_back(sharedAst);
                             } else {
-                                actualIf->body.push_back(sharedAst);
+                                actualIf->mBody.push_back(sharedAst);
                             }
                         }
                     }
