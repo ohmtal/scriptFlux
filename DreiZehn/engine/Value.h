@@ -24,55 +24,55 @@ constexpr uint64_t TAG_PTR   = 0x0002000000000000ULL; // Pointer
 
 class Value {
 private:
-    uint64_t bits; // 8 byte value
+    uint64_t mBits; // 8 byte value
 
-    explicit Value(uint64_t b) : bits(b) {}
+    explicit Value(uint64_t b) : mBits(b) {}
 
 public:
     // Default constructor
-    Value() : bits(0) {}
+    Value() : mBits(0) {}
 
     Value(double d) {
-        bits = std::bit_cast<uint64_t>(d);
+        mBits = std::bit_cast<uint64_t>(d);
     }
 
     Value(int32_t i) {
         // NaN Mask + Int-Tag + 32-Bit Integers
-        bits = QNAN_MASK | TAG_INT | static_cast<uint32_t>(i);
+        mBits = QNAN_MASK | TAG_INT | static_cast<uint32_t>(i);
     }
 
     Value(ValueObject* obj) {
         uint64_t ptrBits = std::bit_cast<uint64_t>(obj);
-        bits = QNAN_MASK | TAG_PTR | (ptrBits & 0x0000FFFFFFFFFFFFULL);
+        mBits = QNAN_MASK | TAG_PTR | (ptrBits & 0x0000FFFFFFFFFFFFULL);
     }
 
     // --- Typ-Check ---
-    inline bool isDouble()  const { return (bits & QNAN_MASK) != QNAN_MASK; }
-    inline bool isInt()     const { return (bits & (QNAN_MASK | TAG_INT)) == (QNAN_MASK | TAG_INT); }
-    inline bool isPointer() const { return (bits & (QNAN_MASK | TAG_PTR)) == (QNAN_MASK | TAG_PTR); }
+    inline bool isDouble()  const { return (mBits & QNAN_MASK) != QNAN_MASK; }
+    inline bool isInt()     const { return (mBits & (QNAN_MASK | TAG_INT)) == (QNAN_MASK | TAG_INT); }
+    inline bool isPointer() const { return (mBits & (QNAN_MASK | TAG_PTR)) == (QNAN_MASK | TAG_PTR); }
 
     inline bool isNumber() {return  isInt() || isDouble();}
 
     // --- Getter (Unboxing) ---
     inline double asDouble() const {
         assert(isDouble());
-        return std::bit_cast<double>(bits);
+        return std::bit_cast<double>(mBits);
     }
 
     inline int32_t asInt() const {
         assert(isInt());
-        return static_cast<int32_t>(bits & 0xFFFFFFFFULL);
+        return static_cast<int32_t>(mBits & 0xFFFFFFFFULL);
     }
 
     inline void* asPointer() const {
         assert(isPointer());
-        uint64_t ptrBits = bits & 0x0000FFFFFFFFFFFFULL;
+        uint64_t ptrBits = mBits & 0x0000FFFFFFFFFFFFULL;
         return std::bit_cast<void*>(ptrBits);
     }
 
     inline ValueObject* asPointerObject() const {
         assert(isPointer());
-        uint64_t ptrBits = bits & 0x0000FFFFFFFFFFFFULL;
+        uint64_t ptrBits = mBits & 0x0000FFFFFFFFFFFFULL;
         return std::bit_cast<ValueObject*>(ptrBits);
     }
 
@@ -83,7 +83,7 @@ public:
             else if (isPointer()) return (double) (asPointer() != nullptr);
             else return 0;
         }
-        return std::bit_cast<double>(bits);
+        return std::bit_cast<double>(mBits);
     }
 
     inline float getFloat() const {
@@ -92,7 +92,7 @@ public:
             else if (isPointer()) return (float) (asPointer() != nullptr);
             else return 0;
         }
-        return (float)std::bit_cast<double>(bits);
+        return (float)std::bit_cast<double>(mBits);
     }
 
     inline int32_t getInt() const {
@@ -101,12 +101,12 @@ public:
             else if (isPointer()) return (int32_t)(asPointer() != nullptr);
             else return 0;
         }
-        return static_cast<int32_t>(bits & 0xFFFFFFFFULL);
+        return static_cast<int32_t>(mBits & 0xFFFFFFFFULL);
     }
 
     inline void* getPointer() const {
         if (!isPointer()) return nullptr;
-        uint64_t ptrBits = bits & 0x0000FFFFFFFFFFFFULL;
+        uint64_t ptrBits = mBits & 0x0000FFFFFFFFFFFFULL;
         return std::bit_cast<void*>(ptrBits);
     }
 

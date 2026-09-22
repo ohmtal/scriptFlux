@@ -18,14 +18,14 @@ namespace DreiZehn{
 
 class Parser {
 private:
-    std::vector<Token> tokens;
-    size_t pos = 0;
+    std::vector<Token> mTokens;
+    size_t mPos = 0;
 
-    Token peek() { return tokens[pos]; }
-    Token peekNext() { if (pos + 1 < tokens.size()) return tokens[pos+1]; else return Token(TokenType::EOFToken); }
-    Token peekNextNext() { if (pos + 2 < tokens.size()) return tokens[pos+2]; else return Token(TokenType::EOFToken); }
-    Token peekPrev() { if (pos > 1) return tokens[pos-1]; else return Token(TokenType::NoToken); }
-    Token advance() { if (pos + 1 < tokens.size()) return tokens[pos++]; else return Token(TokenType::EOFToken);}
+    Token peek() { return mTokens[mPos]; }
+    Token peekNext() { if (mPos + 1 < mTokens.size()) return mTokens[mPos+1]; else return Token(TokenType::EOFToken); }
+    Token peekNextNext() { if (mPos + 2 < mTokens.size()) return mTokens[mPos+2]; else return Token(TokenType::EOFToken); }
+    Token peekPrev() { if (mPos > 1) return mTokens[mPos-1]; else return Token(TokenType::NoToken); }
+    Token advance() { if (mPos + 1 < mTokens.size()) return mTokens[mPos++]; else return Token(TokenType::EOFToken);}
 
     // -------------------------------------------------------------------------
 
@@ -99,9 +99,9 @@ private:
 
                 std::vector<std::unique_ptr<Expression>> args;
                 while (isContinuePeak()) {
-                    size_t lastPos = pos;
+                    size_t lastPos = mPos;
                     args.push_back(parseMath());
-                    if (lastPos == pos) {
+                    if (lastPos == mPos) {
                         Tools::PrintParseError("In method call:");
                         break;
                     }
@@ -112,9 +112,9 @@ private:
             if (FunctionMap::IsFunction(nameToken.mValue)) {
                 std::vector<std::unique_ptr<Expression>> args;
                 while (isContinuePeak()) {
-                    size_t lastPos = pos;
+                    size_t lastPos = mPos;
                     args.push_back(parseMath());
-                    if (lastPos == pos) {
+                    if (lastPos == mPos) {
                        Tools::PrintParseError("In function call:");
                        break;
                     }
@@ -187,9 +187,9 @@ private:
 
                 while (isContinuePeak())
                 {
-                    size_t lastPos = pos;
+                    size_t lastPos = mPos;
                     args.push_back(parseMath());
-                    if (lastPos == pos) {
+                    if (lastPos == mPos) {
                         Tools::PrintParseError("In function call:");
                         break;
                     }
@@ -204,7 +204,7 @@ private:
     }
     // -------------------------------------------------------------------------
 public:
-    Parser(std::vector<Token> t) : tokens(std::move(t)) {}
+    Parser(std::vector<Token> t) : mTokens(std::move(t)) {}
 
     // -------------------------------------------------------------------------
     inline std::vector<std::unique_ptr<ASTNode>> parseStatements() {
@@ -217,15 +217,15 @@ public:
 
             // FIXME need a toggle command
             if (Globals::gDumpStateNodes) {
-                Tools::printf("---------- new statement ------ Pos:%d \n", (int)pos);
-                for(size_t i = pos; i < tokens.size() ; i++) {
-                    Tools::printf("Token %d: %d :: %s\n", i, (int)tokens[i].mType, tokenTypeToString(tokens[i].mType));
+                Tools::printf("---------- new statement ------ Pos:%d \n", (int)mPos);
+                for(size_t i = mPos; i < mTokens.size() ; i++) {
+                    Tools::printf("Token %d: %d :: %s\n", i, (int)mTokens[i].mType, tokenTypeToString(mTokens[i].mType));
                 }
             }
-            size_t startIndex = pos;
+            size_t startIndex = mPos;
             auto stmt = parseLine();
             if (Globals::gDumpStateNodes) {
-                Tools::printf("---------- LINE parsed ------ Pos:%d next:%d :: %s\n", (int)pos, (int)tokens[pos].mType, tokenTypeToString(tokens[pos].mType));
+                Tools::printf("---------- LINE parsed ------ Pos:%d next:%d :: %s\n", (int)mPos, (int)mTokens[mPos].mType, tokenTypeToString(mTokens[mPos].mType));
             }
             if (stmt) {
                 statements.push_back(std::move(stmt));
@@ -233,8 +233,8 @@ public:
             if (peek().mType == TokenType::Semicolon) {
                 advance();
             }
-            else if (pos == startIndex) {
-                Tools::errorf("Syntax-Error: Unexpected token '%s'\n", tokenTypeToString(tokens[pos].mType));
+            else if (mPos == startIndex) {
+                Tools::errorf("Syntax-Error: Unexpected token '%s'\n", tokenTypeToString(mTokens[mPos].mType));
                 advance();
             }
         }
