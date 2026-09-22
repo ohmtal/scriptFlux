@@ -1,0 +1,133 @@
+--  -----------------------------------------------------------------------------
+--  ported from raylib-elfScript to BaseElf / NativSDL to CrazyElf to DreiZehn
+--  original: BSD-License, Copyright (c) 2025 JP Mortiboys (@themushroompirates)
+--  -----------------------------------------------------------------------------
+W = 800
+H = 400
+maxW = W / 2
+minW = maxW * -1
+maxH = H / 2
+minH = maxH * -1
+STAR_COUNT  = 120
+START_DIV   = 0.03125
+Window      = 0
+Renderer    = 0
+Event       = 0
+Speed       = 0.4
+
+fn Init
+    if (SDL_Init SDL_INIT_VIDEO) == false
+        print "Failed to init SDL3"
+        return false
+    end
+
+    Window = SDL_CreateWindow "StarField DreiZehn" W H 0
+    if Window == 0
+        print "Failed to create window"
+        return false
+    end
+
+    Renderer = SDL_CreateRenderer Window "opengl"
+    Event = SDL_CreateEvent
+
+    Points_X = array.new
+    Points_Y = array.new
+    Points_Z = array.new
+
+    i = 0
+    while i < STAR_COUNT
+        array.push Points_X math.random minW maxW
+        array.push Points_Y math.random minH maxH
+        array.push Points_Z math.randomf
+        i = i + 1
+    end
+
+    return true
+end
+
+if Init
+    Running = true
+
+    Time_Last = SDL_GetTicks
+
+    while Running
+        Time_Now = SDL_GetTicks
+        Dt = (Time_Now - Time_Last) / 1000.0
+        Time_Last = Time_Now
+
+        while SDL_PollEvent Event
+            Type = SDL_GetEventType Event
+            if Type == 256
+                Running = false
+            end
+            if Type == 768
+                if (SDL_GetEventKey Event) == 27
+                    Running = false
+                end
+            end
+        end
+
+        SDL_SetRenderDrawColor Renderer 20 20 40 255
+        SDL_RenderClear Renderer
+
+        i = 0
+        while i < STAR_COUNT
+            pX = array.get Points_X i
+            pY = array.get Points_Y i
+            pZ = array.get Points_Z i
+
+            pZ = pZ - (Dt * Speed)
+
+            if pZ < 0.01
+                pX = math.random minW maxW
+                pY = math.random minH maxH
+                pZ = 1.0
+            end
+
+            invZ = 1.0 / pZ
+            screenX = (W * 0.5) + (pX * invZ)
+            screenY = (H * 0.5) + (pY * invZ)
+
+            if screenX < 0
+                pZ = 0.0
+            else
+                if screenX > W
+                    pZ = 0.0
+                else
+                    if screenY < 0
+                        pZ = 0.0
+                    else
+                        if screenY > H
+                            pZ = 0.0
+                        end
+                    end
+                end
+            end
+
+            if pZ > 0.0
+                radius = 2.0 * (1.0 - pZ)
+                if radius < 0.5
+                    radius = 0.5
+                end
+
+                SDL_SetRenderDrawColor Renderer 255 255 255 255
+                SDL_RenderFillRect Renderer screenX screenY radius radius
+            end
+
+            array.set Points_X i pX
+            array.set Points_Y i pY
+            array.set Points_Z i pZ
+
+            i = i + 1
+        end
+
+        SDL_SetRenderDrawColor Renderer 200 200 255 255
+        SDL_RenderDebugText Renderer 10 10 "StarField DreiZehn :: :D"
+
+        SDL_RenderPresent Renderer
+        SDL_Delay 16
+    end
+end
+
+SDL_DestroyWindow Window
+SDL_Quit

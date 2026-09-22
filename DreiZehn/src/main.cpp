@@ -4,6 +4,7 @@
 
 #include "engine/DreiZehn.h"
 #include "engine/DebugFunctions.h"
+#include "engine/ArrayFunctions.h"
 #include "engine/SDL3Functions.h"
 
 void RegisterUserFunc() {
@@ -23,6 +24,7 @@ int main(int argc, char* argv[]) {
 
     Environment env;
     RegisterCoreFunctions(env);
+    RegisterArrayFunctions(env);
     RegisterMathFunctions();
     RegisterDebugFunctions();
     RegisterUserFunc();
