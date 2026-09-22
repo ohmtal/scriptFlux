@@ -277,7 +277,7 @@ public:
             auto start = parseMath();
             auto end = parseMath();
 
-            return std::make_unique<ForStatement>(varName, std::move(start), std::move(end));
+            return std::make_unique<ForStatement>(SymbolTable::insert(varName), std::move(start), std::move(end));
         }
         else
         if (peek().mType == TokenType::While) {

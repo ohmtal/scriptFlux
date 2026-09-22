@@ -76,12 +76,8 @@ struct CallExpression : public Expression {
 
 // method/field on Pointer  calls --------------------------------------------------------------
 struct MethodExpression : public Expression {
-    // std::string mPointerName;
-    // std::string mMethodName;
-
     uint32_t mPointerNameSymbolId;
     uint32_t mMethodNameSymbolId;
-
 
     std::vector<std::unique_ptr<Expression>> mArguments;
 
@@ -92,7 +88,7 @@ struct MethodExpression : public Expression {
 };
 // Assingment ------------------------------------------------------------------
 struct AssignStatement : public ASTNode {
-    std::string mVarName;
+    std::string mVarName; //TODO
     std::unique_ptr<Expression> mRhs; // Right-Hand Side
 
     AssignStatement(std::string name, std::unique_ptr<Expression> expr)
@@ -133,12 +129,13 @@ struct FunctionDefineEndNode : public ASTNode {};
 
 // for -------------------------------------------------------------------------
 struct ForStatement : public BlockStatement {
-    std::string mIteratorVarName;
+    // std::string mIteratorVarName;
+    uint32_t mIteratorVarNameSymbolId = 0;
     std::unique_ptr<Expression> mStartExpr;
     std::unique_ptr<Expression> mEndExpr;
 
-    ForStatement(std::string name, std::unique_ptr<Expression> start, std::unique_ptr<Expression> end)
-    : mIteratorVarName(name), mStartExpr(std::move(start)), mEndExpr(std::move(end)) {}
+    ForStatement(uint32_t nameSymId, std::unique_ptr<Expression> start, std::unique_ptr<Expression> end)
+    : mIteratorVarNameSymbolId(nameSymId), mStartExpr(std::move(start)), mEndExpr(std::move(end)) {}
 };
 // break -------------------------------------------------------------------------
 struct BreakStatement : public ASTNode {};

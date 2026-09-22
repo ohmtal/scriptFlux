@@ -21,6 +21,7 @@ namespace Globals {
     inline Environment* gCurEnv = nullptr;
     // inline const std::string gEmptyString = ""; unused!
     inline  bool gDumpStateNodes = false; //Debug
+    inline  bool gShowVariableDebug = false; //Debug
 }
 
 

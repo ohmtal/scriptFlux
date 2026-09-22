@@ -67,6 +67,9 @@ public:
     // Variable getter/setter
     // -------------------------------------------------------------------------
     void setVariable(uint32_t id, Value val) {
+
+        if (Globals::gShowVariableDebug) Tools::printf("DEBUG: setVariable :: name: %s id: %d, floatval: %f\n", SymbolTable::getName(id).c_str(), id, val.getFloat());
+
         auto it = mVariables.find(id);
         if (it != mVariables.end()) {
             it->second = val;
@@ -94,6 +97,8 @@ public:
     }
     // // -------------------------------------------------------------------------
     Value getVariable(uint32_t id) {
+        if (Globals::gShowVariableDebug) Tools::printf("DEBUG: getVariable :: name: %s id: %d\n", SymbolTable::getName(id).c_str(), id);
+
         auto it = mVariables.find(id);
         if (it != mVariables.end()) {
             return it->second;
@@ -210,7 +215,7 @@ public:
             Environment loopEnv(&currentEnv);
 
             for (int i = start; i <= end; ++i) {
-                loopEnv.setVariable(SymbolTable::insert(forStmt->mIteratorVarName), Value(i));
+                loopEnv.setVariable(forStmt->mIteratorVarNameSymbolId, Value(i));
 
                 for (auto& statement : forStmt->mBody) {
                     FlowSignal sig = currentEnv.execute(statement.get(), loopEnv);

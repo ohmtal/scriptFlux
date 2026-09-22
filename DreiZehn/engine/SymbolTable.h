@@ -20,11 +20,11 @@
 
 class SymbolTable {
 public:
-    static uint32_t insert(const std::string& name) {
+    inline static uint32_t insert(const std::string& name) {
         return get().internalInsert(name);
     }
 
-    static const std::string& getName(uint32_t id) {
+    inline static const std::string& getName(uint32_t id) {
         return get().internalGetName(id);
     }
 
@@ -34,11 +34,13 @@ public:
     SymbolTable& operator=(SymbolTable&&) = delete;
 
 private:
-    SymbolTable() = default; // Private Konstruktor für das Singleton
+    // SymbolTable() = default;
+    SymbolTable() {
+        internalInsert(""); //first is a emty string
+    }
 
     static SymbolTable& get() {
         static SymbolTable instance;
-        instance.internalInsert(""); //first is a emty string
         return instance;
     }
 

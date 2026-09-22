@@ -1,4 +1,4 @@
-# Benchmark-Test for DreiZehn Engine
+# Benchmark-Test for DreiZehn Script
 JLOOPS = 25
 ILOOPS = 1000000
 
