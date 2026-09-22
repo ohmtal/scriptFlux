@@ -28,6 +28,7 @@ enum class TokenType {
     // fn functions
     , Fn, End
 
+
     // for iter
      ,For
 
@@ -37,6 +38,10 @@ enum class TokenType {
     , Semicolon
 
     , While
+    , Or, And, BitOr, BitAnd
+    , LowerEqual, GreaterEqual
+    , SHL, SHR
+
 
     , EOFToken
 };
@@ -76,6 +81,15 @@ inline const char* tokenTypeToString(TokenType type) {
         case TokenType::Break:         return "Break";
         case TokenType::Return:        return "Return";
 
+        case TokenType::Or:            return "OR ||";
+        case TokenType::BitOr:         return "Bit |";
+        case TokenType::BitAnd:         return "Bit &";
+        case TokenType::And:            return "AND &&";
+        case TokenType::LowerEqual:     return "LowerEqual";
+        case TokenType::GreaterEqual:   return "GreaterEqual";
+        case TokenType::SHL:            return "Shift Left <<";
+        case TokenType::SHR:            return "Shift Right >>";
+
         case TokenType::Semicolon:     return "Semicolon";
         case TokenType::EOFToken:      return "EOFToken";
 
@@ -107,6 +121,8 @@ public:
             // // ----------------------------------------------------------------
             if (std::isspace(peek())) { advance(); continue; }
             // ----------------------------------------------------------------
+            if (peek() == '>' && peekNext() == '=') { advance();advance(); tokens.push_back({TokenType::GreaterEqual, ">="}); continue; }
+            if (peek() == '<' && peekNext() == '=') { advance();advance(); tokens.push_back({TokenType::LowerEqual, "<="}); continue; }
 
             if (peek() == '=') {
                 advance();
@@ -131,9 +147,18 @@ public:
             if (peek() == '/') { advance(); tokens.push_back({TokenType::Div,   "/"}); continue; }
 
             // ----------------------------------------------------------------
+            if (peek() == '>' && peekNext() == '>') { advance();advance(); tokens.push_back({TokenType::SHR, ">>"}); continue; }
+            if (peek() == '<' && peekNext() == '<') { advance();advance(); tokens.push_back({TokenType::SHL, "<<"}); continue; }
+
             if (peek() == '>') { advance(); tokens.push_back({TokenType::Greater, ">"}); continue; }
             if (peek() == '<') { advance(); tokens.push_back({TokenType::Less, "<"}); continue; }
             // ----------------------------------------------------------------
+
+            if (peek() == '|' && peekNext() != '|') { advance(); tokens.push_back({TokenType::BitOr, "|"}); continue; }
+            if (peek() == '&' && peekNext() != '&') { advance(); tokens.push_back({TokenType::BitAnd, "&"}); continue; }
+
+            if (peek() == '|' && peekNext() == '|') { advance();advance(); tokens.push_back({TokenType::Or, "||"}); continue; }
+            if (peek() == '&' && peekNext() == '&') { advance();advance(); tokens.push_back({TokenType::And, "&&"}); continue; }
 
             // ----------------------------------------------------------------
             // Numbers

@@ -98,11 +98,23 @@ namespace DreiZehn {
             return Value((l - r) > EPSILON ? 1 : 0);
         }
         else
+        if (op == TokenType::GreaterEqual) {
+            double l = lVal.getDouble();
+            double r = rVal.getDouble();
+            return Value(l > (r - EPSILON) ? 1 : 0);
+        }
+        else
         if (op == TokenType::Less) {
             double l = lVal.getDouble();
             double r = rVal.getDouble();
             return Value((r - l) > EPSILON ? 1 : 0);
         }
+        else
+            if (op == TokenType::LowerEqual) {
+                double l = lVal.getDouble();
+                double r = rVal.getDouble();
+                return Value(l < (r + EPSILON) ? 1 : 0);
+            }
         else
         if (op == TokenType::Equal) {
             if (lVal.isPointer() && rVal.isPointer()) {
@@ -121,7 +133,42 @@ namespace DreiZehn {
             double r = rVal.getDouble();
             return Value(std::abs(l - r) < EPSILON ? 0 : 1);
         }
-
+        else
+        if (op == TokenType::Or) {
+            int l = lVal.getInt();
+            int r = rVal.getInt();
+            return Value( l || r);
+        }
+        else
+        if (op == TokenType::And) {
+            int l = lVal.getInt();
+            int r = rVal.getInt();
+            return Value( l && r);
+        }
+        else
+        if (op == TokenType::BitAnd) {
+            int l = lVal.getInt();
+            int r = rVal.getInt();
+            return Value( l & r);
+        }
+        else
+        if (op == TokenType::BitOr) {
+            int l = lVal.getInt();
+            int r = rVal.getInt();
+            return Value( l | r);
+        }
+        else
+        if (op == TokenType::SHL) {
+            int l = lVal.getInt();
+            int r = rVal.getInt();
+            return Value( l << r);
+        }
+        else
+        if (op == TokenType::SHR) {
+            int l = lVal.getInt();
+            int r = rVal.getInt();
+            return Value( l >> r);
+        }
 
         if (lVal.isInt() && rVal.isInt()) {
             if (op == TokenType::Plus) return Value(lVal.asInt() + rVal.asInt());

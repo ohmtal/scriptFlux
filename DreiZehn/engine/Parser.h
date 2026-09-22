@@ -37,7 +37,16 @@ private:
         || peek().type == TokenType::Greater
         || peek().type == TokenType::Less
         || peek().type == TokenType::Equal
-        || peek().type == TokenType::NotEqual;
+        || peek().type == TokenType::NotEqual
+        || peek().type == TokenType::Or
+        || peek().type == TokenType::And
+        || peek().type == TokenType::LowerEqual
+        || peek().type == TokenType::GreaterEqual
+        || peek().type == TokenType::BitAnd
+        || peek().type == TokenType::BitOr
+        || peek().type == TokenType::SHL
+        || peek().type == TokenType::SHR
+        ;
     }
     bool isContinuePeak() {
         return peek().type != TokenType::EOFToken
@@ -116,6 +125,8 @@ private:
             || peek().type == TokenType::Less
             || peek().type == TokenType::Equal
             || peek().type == TokenType::NotEqual
+            || peek().type == TokenType::LowerEqual
+            || peek().type == TokenType::GreaterEqual
         ) {
             Token op = advance();
             auto right = parseMath();
