@@ -116,8 +116,8 @@ public:
 
         // --- Return Statement ---
         if (auto* retStmt = dynamic_cast<ReturnStatement*>(node)) {
-            if (retStmt->expression) {
-                Value retVal = retStmt->expression->evaluate(currentEnv);
+            if (retStmt->mExpression) {
+                Value retVal = retStmt->mExpression->evaluate(currentEnv);
                 currentEnv.setVariable("__return_value__", retVal);
             }
             return FlowSignal::Return;
@@ -153,8 +153,8 @@ public:
 
         // ---- for statement .....
         else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
-            Value startVal = forStmt->startExpr->evaluate(currentEnv);
-            Value endVal = forStmt->endExpr->evaluate(currentEnv);
+            Value startVal = forStmt->mStartExpr->evaluate(currentEnv);
+            Value endVal = forStmt->mEndExpr->evaluate(currentEnv);
 
             if (!startVal.isInt() || !endVal.isInt()) {
                 Tools::errorf("Error: 'for'-loop only support integer borders\n");

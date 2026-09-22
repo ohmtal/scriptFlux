@@ -126,19 +126,19 @@ struct FunctionDefineEndNode : public ASTNode {};
 // for -------------------------------------------------------------------------
 struct ForStatement : public BlockStatement {
     std::string mIteratorVarName;
-    std::unique_ptr<Expression> startExpr;
-    std::unique_ptr<Expression> endExpr;
+    std::unique_ptr<Expression> mStartExpr;
+    std::unique_ptr<Expression> mEndExpr;
 
     ForStatement(std::string name, std::unique_ptr<Expression> start, std::unique_ptr<Expression> end)
-    : mIteratorVarName(name), startExpr(std::move(start)), endExpr(std::move(end)) {}
+    : mIteratorVarName(name), mStartExpr(std::move(start)), mEndExpr(std::move(end)) {}
 };
 // break -------------------------------------------------------------------------
 struct BreakStatement : public ASTNode {};
 
 // return -------------------------------------------------------------------------
 struct ReturnStatement : public ASTNode {
-    std::unique_ptr<Expression> expression;
-    ReturnStatement(std::unique_ptr<Expression> expr) : expression(std::move(expr)) {}
+    std::unique_ptr<Expression> mExpression;
+    ReturnStatement(std::unique_ptr<Expression> expr) : mExpression(std::move(expr)) {}
 };
 
 // While -------------------------------------------------------------------------

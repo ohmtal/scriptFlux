@@ -103,22 +103,22 @@ inline const char* tokenTypeToString(TokenType type) {
 }
 
 struct Token {
-    TokenType type;
-    std::string value;
+    TokenType mType;
+    std::string mValue;
 };
 
 class Lexer {
 private:
-    std::string src;
-    int32_t pos = 0;
+    std::string mSrc;
+    int32_t mPos = 0;
 
-    char peek() { return pos < src.size() ? src[pos] : '\0'; }
-    char peekNext() { return pos+1 < src.size() ? src[pos + 1] : '\0'; }
-    char peekPrev() { return pos-1 > 0  ? src[pos - 1] : '\0'; }
-    char advance() { return pos < src.size() ? src[pos++] : '\0'; }
+    char peek() { return mPos < mSrc.size() ? mSrc[mPos] : '\0'; }
+    char peekNext() { return mPos+1 < mSrc.size() ? mSrc[mPos + 1] : '\0'; }
+    char peekPrev() { return mPos-1 > 0  ? mSrc[mPos - 1] : '\0'; }
+    char advance() { return mPos < mSrc.size() ? mSrc[mPos++] : '\0'; }
 
 public:
-    Lexer(std::string source) : src(std::move(source)) {}
+    Lexer(std::string source) : mSrc(std::move(source)) {}
 
     std::vector<Token> tokenize() {
         std::vector<Token> tokens;
@@ -235,7 +235,7 @@ public:
                     advance(); //eat '"'
                 } else {
                     Tools::errorf("[Lexer-ERROR] String not closed!\n");
-                    pos = src.size();
+                    mPos = mSrc.size();
                     continue;
                 }
 

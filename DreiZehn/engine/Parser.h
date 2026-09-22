@@ -32,40 +32,40 @@ private:
 
     bool isMathType() {
         return
-        peek().type == TokenType::Plus
-        || peek().type == TokenType::Minus
-        || peek().type == TokenType::Mul
-        || peek().type == TokenType::Div
-        || peek().type == TokenType::Greater
-        || peek().type == TokenType::Less
-        || peek().type == TokenType::Equal
-        || peek().type == TokenType::NotEqual
-        || peek().type == TokenType::Or
-        || peek().type == TokenType::And
-        || peek().type == TokenType::LowerEqual
-        || peek().type == TokenType::GreaterEqual
-        || peek().type == TokenType::BitAnd
-        || peek().type == TokenType::BitOr
-        || peek().type == TokenType::SHL
-        || peek().type == TokenType::SHR
+        peek().mType == TokenType::Plus
+        || peek().mType == TokenType::Minus
+        || peek().mType == TokenType::Mul
+        || peek().mType == TokenType::Div
+        || peek().mType == TokenType::Greater
+        || peek().mType == TokenType::Less
+        || peek().mType == TokenType::Equal
+        || peek().mType == TokenType::NotEqual
+        || peek().mType == TokenType::Or
+        || peek().mType == TokenType::And
+        || peek().mType == TokenType::LowerEqual
+        || peek().mType == TokenType::GreaterEqual
+        || peek().mType == TokenType::BitAnd
+        || peek().mType == TokenType::BitOr
+        || peek().mType == TokenType::SHL
+        || peek().mType == TokenType::SHR
         ;
     }
     bool isContinuePeak() {
-        return peek().type != TokenType::EOFToken
-        && peek().type != TokenType::RParen
-        && peek().type != TokenType::Semicolon
-        && peek().type != TokenType::End
-        && peek().type != TokenType::Else
+        return peek().mType != TokenType::EOFToken
+        && peek().mType != TokenType::RParen
+        && peek().mType != TokenType::Semicolon
+        && peek().mType != TokenType::End
+        && peek().mType != TokenType::Else
         && !isMathType();
     }
     // -------------------------------------------------------------------------
     std::unique_ptr<Expression> parsePrimary() {
-        if (peek().type == TokenType::LParen) {
+        if (peek().mType == TokenType::LParen) {
             advance();
 
             auto expr = parseMath();
 
-            if (peek().type == TokenType::RParen) {
+            if (peek().mType == TokenType::RParen) {
                 advance(); //  ')'
             } else {
                 Tools::errorf("Error: Missing closing bracket %s %d\n", __FILE__, __LINE__);
@@ -73,25 +73,25 @@ private:
             return expr;
         }
 
-        if (peek().type == TokenType::Number || peek().type == TokenType::StringLiteral) {
+        if (peek().mType == TokenType::Number || peek().mType == TokenType::StringLiteral) {
             Token t = advance();
-            return std::make_unique<LiteralExpression>(t.type, t.value);
+            return std::make_unique<LiteralExpression>(t.mType, t.mValue);
         }
 
 
 
 
-        if (peek().type == TokenType::Identifier) {
+        if (peek().mType == TokenType::Identifier) {
             Token nameToken = advance();
 
-            Value* constansPointer = FunctionMap::getConstants(nameToken.value);
+            Value* constansPointer = FunctionMap::getConstants(nameToken.mValue);
             if (constansPointer != nullptr) {
                 return std::make_unique<ValueExpression>((*constansPointer));
             }
 
             // current peek must be the arrow
-            if (peek().type  == TokenType::Arrow
-                && peekNext().type == TokenType::Identifier
+            if (peek().mType  == TokenType::Arrow
+                && peekNext().mType == TokenType::Identifier
             ) {
 
                 advance(); // eat ->
@@ -106,10 +106,10 @@ private:
                         break;
                     }
                 }
-                return std::make_unique<MethodExpression>(nameToken.value, methodToken.value, std::move(args));
+                return std::make_unique<MethodExpression>(nameToken.mValue, methodToken.mValue, std::move(args));
             }
 
-            if (FunctionMap::IsFunction(nameToken.value)) {
+            if (FunctionMap::IsFunction(nameToken.mValue)) {
                 std::vector<std::unique_ptr<Expression>> args;
                 while (isContinuePeak()) {
                     size_t lastPos = pos;
@@ -120,10 +120,10 @@ private:
                     }
 
                 }
-                return std::make_unique<CallExpression>(nameToken.value, std::move(args));
+                return std::make_unique<CallExpression>(nameToken.mValue, std::move(args));
             }
 
-            return std::make_unique<VariableExpression>(nameToken.value);
+            return std::make_unique<VariableExpression>(nameToken.mValue);
         }
 
         return nullptr;
@@ -135,7 +135,7 @@ private:
         while (isMathType()){
             Token op = advance();
             auto right = parsePrimary();
-            left = std::make_unique<BinaryExpression>(std::move(left), op.type, std::move(right));
+            left = std::make_unique<BinaryExpression>(std::move(left), op.mType, std::move(right));
         }
 
         return left;
@@ -145,27 +145,27 @@ private:
     std::unique_ptr<Expression> parseComparison() {
         auto left = parseMath();
 
-        while (peek().type == TokenType::Greater
-            || peek().type == TokenType::Less
-            || peek().type == TokenType::Equal
-            || peek().type == TokenType::NotEqual
-            || peek().type == TokenType::LowerEqual
-            || peek().type == TokenType::GreaterEqual
+        while (peek().mType == TokenType::Greater
+            || peek().mType == TokenType::Less
+            || peek().mType == TokenType::Equal
+            || peek().mType == TokenType::NotEqual
+            || peek().mType == TokenType::LowerEqual
+            || peek().mType == TokenType::GreaterEqual
         ) {
             Token op = advance();
             auto right = parseMath();
-            left = std::make_unique<BinaryExpression>(std::move(left), op.type, std::move(right));
+            left = std::make_unique<BinaryExpression>(std::move(left), op.mType, std::move(right));
         }
         return left;
     }
     // -------------------------------------------------------------------------
     std::unique_ptr<Expression> parseExpression() {
 
-        if (peek().type == TokenType::LParen) {
+        if (peek().mType == TokenType::LParen) {
             advance(); // skik '('
             auto expr = parseExpression(); // inner statement
 
-            if (peek().type == TokenType::RParen) {
+            if (peek().mType == TokenType::RParen) {
                 advance(); // skip ')'
             } else {
                 Tools::errorf("Error: Missing closing bracket %s %d\n", __FILE__, __LINE__);
@@ -173,16 +173,16 @@ private:
             return expr;
         }
 
-        if (peek().type == TokenType::Number || peek().type == TokenType::StringLiteral) {
+        if (peek().mType == TokenType::Number || peek().mType == TokenType::StringLiteral) {
             Token t = advance();
-            return std::make_unique<LiteralExpression>(t.type, t.value);
+            return std::make_unique<LiteralExpression>(t.mType, t.mValue);
         }
 
 
-        if (peek().type == TokenType::Identifier) {
+        if (peek().mType == TokenType::Identifier) {
             Token nameToken = advance();
 
-            if (FunctionMap::IsFunction(nameToken.value)) {
+            if (FunctionMap::IsFunction(nameToken.mValue)) {
                 std::vector<std::unique_ptr<Expression>> args;
 
                 while (isContinuePeak())
@@ -194,10 +194,10 @@ private:
                         break;
                     }
                 }
-                return std::make_unique<CallExpression>(nameToken.value, std::move(args));
+                return std::make_unique<CallExpression>(nameToken.mValue, std::move(args));
             }
 
-            return std::make_unique<VariableExpression>(nameToken.value);
+            return std::make_unique<VariableExpression>(nameToken.mValue);
         }
 
         return nullptr;
@@ -209,8 +209,8 @@ public:
     // -------------------------------------------------------------------------
     inline std::vector<std::unique_ptr<ASTNode>> parseStatements() {
         std::vector<std::unique_ptr<ASTNode>> statements;
-        while (peek().type != TokenType::EOFToken) {
-            if (peek().type == TokenType::Semicolon) {
+        while (peek().mType != TokenType::EOFToken) {
+            if (peek().mType == TokenType::Semicolon) {
                 advance();
                 continue;
             }
@@ -219,22 +219,22 @@ public:
             if (Globals::gDumpStateNodes) {
                 Tools::printf("---------- new statement ------ Pos:%d \n", (int)pos);
                 for(size_t i = pos; i < tokens.size() ; i++) {
-                    Tools::printf("Token %d: %d :: %s\n", i, (int)tokens[i].type, tokenTypeToString(tokens[i].type));
+                    Tools::printf("Token %d: %d :: %s\n", i, (int)tokens[i].mType, tokenTypeToString(tokens[i].mType));
                 }
             }
             size_t startIndex = pos;
             auto stmt = parseLine();
             if (Globals::gDumpStateNodes) {
-                Tools::printf("---------- LINE parsed ------ Pos:%d next:%d :: %s\n", (int)pos, (int)tokens[pos].type, tokenTypeToString(tokens[pos].type));
+                Tools::printf("---------- LINE parsed ------ Pos:%d next:%d :: %s\n", (int)pos, (int)tokens[pos].mType, tokenTypeToString(tokens[pos].mType));
             }
             if (stmt) {
                 statements.push_back(std::move(stmt));
             }
-            if (peek().type == TokenType::Semicolon) {
+            if (peek().mType == TokenType::Semicolon) {
                 advance();
             }
             else if (pos == startIndex) {
-                Tools::errorf("Syntax-Error: Unexpected token '%s'\n", tokenTypeToString(tokens[pos].type));
+                Tools::errorf("Syntax-Error: Unexpected token '%s'\n", tokenTypeToString(tokens[pos].mType));
                 advance();
             }
         }
@@ -244,32 +244,32 @@ public:
     // -------------------------------------------------------------------------
     inline std::unique_ptr<ASTNode> parseLine() {
 
-        if (peek().type == TokenType::Fn) {
+        if (peek().mType == TokenType::Fn) {
             advance(); //eat fn
 
-            if (peek().type != TokenType::Identifier) {
+            if (peek().mType != TokenType::Identifier) {
                 Tools::errorf("Syntax-Error: function name required after fn\n");
                 return nullptr;
             }
 
-            std::string funcName = advance().value;
+            std::string funcName = advance().mValue;
             std::vector<std::string> params;
 
-            while (peek().type == TokenType::Identifier) {
-                params.push_back(advance().value);
+            while (peek().mType == TokenType::Identifier) {
+                params.push_back(advance().mValue);
             }
             FunctionMap::RegisteredScriptFunctions[funcName] = { params, {} };
             return std::make_unique<FunctionDefineStartNode>(funcName);
         }
         else
-        if (peek().type == TokenType::For) {
+        if (peek().mType == TokenType::For) {
             advance();
 
-            if (peek().type != TokenType::Identifier) {
+            if (peek().mType != TokenType::Identifier) {
                 Tools::errorf("Syntax-Error: variable name after for expected\n");
                 return nullptr;
             }
-            std::string varName = advance().value;
+            std::string varName = advance().mValue;
 
             auto start = parseMath();
             auto end = parseMath();
@@ -277,56 +277,56 @@ public:
             return std::make_unique<ForStatement>(varName, std::move(start), std::move(end));
         }
         else
-        if (peek().type == TokenType::While) {
+        if (peek().mType == TokenType::While) {
             advance();
             auto condition = parseComparison();
             return std::make_unique<WhileStatement>(std::move(condition));
         }
 
         else
-        if (peek().type == TokenType::End) {
+        if (peek().mType == TokenType::End) {
             advance();
             return std::make_unique<FunctionDefineEndNode>();
         }
         else
-        if (peek().type == TokenType::If) {
+        if (peek().mType == TokenType::If) {
             advance(); // skip "if"
             auto condition = parseComparison();
             return std::make_unique<IfStatement>(std::move(condition));
         }
         else
-        if (peek().type == TokenType::Else) {
+        if (peek().mType == TokenType::Else) {
             advance(); // skip "else"
             return std::make_unique<ElseMarkerNode>();
         }
         else
-        if (peek().type == TokenType::Break) {
+        if (peek().mType == TokenType::Break) {
             advance(); // eat 'break'
             return std::make_unique<BreakStatement>();
         }
-        else if (peek().type == TokenType::Return) {
+        else if (peek().mType == TokenType::Return) {
             advance(); // eat'return'
 
             std::unique_ptr<Expression> rhs = nullptr;
 
-            if (peek().type != TokenType::EOFToken &&
-                peek().type != TokenType::End &&
-                peek().type != TokenType::Semicolon &&
-                peek().type != TokenType::RParen) {
+            if (peek().mType != TokenType::EOFToken &&
+                peek().mType != TokenType::End &&
+                peek().mType != TokenType::Semicolon &&
+                peek().mType != TokenType::RParen) {
                 rhs = parseComparison();
             }
 
             return std::make_unique<ReturnStatement>(std::move(rhs));
         }
         else
-        if (peek().type == TokenType::Identifier) {
-            if (peekNext().type == TokenType::Assign) {
-                std::string varName = advance().value;
+        if (peek().mType == TokenType::Identifier) {
+            if (peekNext().mType == TokenType::Assign) {
+                std::string varName = advance().mValue;
                 advance(); // '='
                 auto rhs = parseComparison();
                 return std::make_unique<AssignStatement>(varName, std::move(rhs));
             }
-            else if (peekNext().type == TokenType::Arrow) {
+            else if (peekNext().mType == TokenType::Arrow) {
                 return parsePrimary();
             }
 
