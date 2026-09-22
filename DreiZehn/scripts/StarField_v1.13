@@ -2,7 +2,7 @@
 --  ported from raylib-elfScript to BaseElf / NativSDL to CrazyElf to DreiZehn
 --  original: BSD-License, Copyright (c) 2025 JP Mortiboys (@themushroompirates)
 --  -----------------------------------------------------------------------------
-print " StarField v2 @13 startup...."
+print " StarField @13 startup...."
 W = 640
 H = 320
 maxW = W / 2
@@ -32,14 +32,16 @@ fn Init
     Renderer = SDL_CreateRenderer Window
     Event = SDL_CreateEvent
 
-    Points_X = Array.new
-    Points_Y = Array.new
-    Points_Z = Array.new
+    Points_X = array.new
+    Points_Y = array.new
+    Points_Z = array.new
 
-    for i 1 STAR_COUNT
-        Points_X->push  math.random minW maxW
-        Points_Y->push  math.random minH maxH
-        Points_Z->push  math.randomf
+    i = 0
+    while i < STAR_COUNT
+        array.push Points_X math.random minW maxW
+        array.push Points_Y math.random minH maxH
+        array.push Points_Z math.randomf
+        i = i + 1
     end
 
     return true
@@ -72,9 +74,9 @@ if Init
 
         i = 0
         while i < STAR_COUNT
-            pX = Points_X->get i
-            pY = Points_Y->get i
-            pZ = Points_Z->get i
+            pX = array.get Points_X i
+            pY = array.get Points_Y i
+            pZ = array.get Points_Z i
 
             pZ = pZ - (Dt * Speed)
 
@@ -88,10 +90,11 @@ if Init
             screenX = (W * 0.5) + (pX * invZ)
             screenY = (H * 0.5) + (pY * invZ)
 
-            if (screenX < 0) || (screenX > W) || (screenY < 0)  || (screenY > H)
-                pZ = 0.0
-            end
-
+            -- FIXME need || so hard :P
+            if screenX < 0 pZ = 0.0 end
+            if screenX > W pZ = 0.0 end
+            if screenY < 0 pZ = 0.0 end
+            if screenY > H pZ = 0.0 end
 
             if pZ > 0.0
                 radius = 2.0 * (1.0 - pZ)
@@ -103,9 +106,9 @@ if Init
                 SDL_RenderFillRect Renderer screenX screenY radius radius
             end
 
-            Points_X->set i pX
-            Points_Y->set i pY
-            Points_Z->set i pZ
+            array.set Points_X i pX
+            array.set Points_Y i pY
+            array.set Points_Z i pZ
 
             i = i + 1
         end

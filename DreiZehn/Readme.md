@@ -147,8 +147,20 @@ run "test_suite.13"
 * **String Memory Safety:** The lexer forces automatic emergency lookbehinds on unclosed string sequences (`"hello...`) to prevent state corruption.
 * **Garbage Collection (GC):** `Environment::shutdown()` walks through all dynamically tracked memory nodes upon exit to prevent memory leaks in the host C++ application.
 
+## 9. Added Methods by Arrow:
 
-## 9. Basic SDL3 implementation 
+```
+> foo = Array.new
+> foo->push "Hello Foo"
+> print (foo->size) (foo->get 0) 
+1 Hello Foo 
+> print (foo->pop)
+Hello Foo 
+
+```
+
+
+## x. Basic SDL3 implementation 
 
 Version 0.3: I added SDL3 to test my Script system:
 

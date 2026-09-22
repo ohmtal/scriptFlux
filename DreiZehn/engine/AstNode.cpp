@@ -32,6 +32,31 @@ namespace DreiZehn {
 
     }
     // -------------------------------------------------------------------------
+    Value MethodExpression::evaluate(Environment& env) {
+        Value objectPointer = env.getVariable(pointerName);
+        if (!objectPointer.isPointer()) {
+            Tools::errorf("RunTime Error: Object %s not found.\n", pointerName.c_str());
+            return Value();
+        }
+        ValueObject* obj = dynamic_cast<ValueObject*>(objectPointer.asPointerObject());
+        if (!obj) {
+            Tools::errorf("RunTime Error: Invalid Object: %s.\n", pointerName.c_str());
+            return Value();
+        }
+        std::vector<Value> evaluatedArgs;
+        for (auto& argExpr : arguments) {
+            if (argExpr) evaluatedArgs.push_back(argExpr->evaluate(env));
+        }
+
+        Value returnValue = Value(0);
+
+        if (!obj->onMethodCall(methodName, evaluatedArgs, returnValue)) {
+            Tools::errorf("Runtime Error in method call: %s -> %s\n", pointerName.c_str(), methodName.c_str());
+        }
+        return returnValue;
+
+    }
+    // -------------------------------------------------------------------------
     Value CallExpression::evaluate(Environment& env) {
         FunctionMap::CallBack* cb = nullptr;
         cb = FunctionMap::GetCFunction(funcName);
@@ -42,12 +67,12 @@ namespace DreiZehn {
                 if (argExpr) evaluatedArgs.push_back(argExpr->evaluate(env));
             }
 
-            Value returnValue;
+            Value returnValue = Value(0);
             // bool success = FunctionMap::RegisteredFunctions[funcName](evaluatedArgs, returnValue);
             bool success = (*cb)(evaluatedArgs, returnValue);
 
             if (!success) {
-                Tools::errorf("Error in function: %s\n", funcName.c_str());
+                Tools::errorf("Runtime Error in function: %s\n", funcName.c_str());
             }
             return returnValue;
         }
@@ -65,7 +90,7 @@ namespace DreiZehn {
                     localEnv.setVariable(func.parameterNames[i], evaluatedArg);
                 }
             }
-            Value functionResult;
+            Value functionResult = Value(0);
             for (auto& statement : func.body) {
                 FlowSignal sig = env.execute(statement.get(), localEnv);
 
@@ -189,4 +214,5 @@ namespace DreiZehn {
 
 
     // -------------------------------------------------------------------------
+
 }

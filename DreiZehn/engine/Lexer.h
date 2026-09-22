@@ -42,7 +42,9 @@ enum class TokenType {
     , LowerEqual, GreaterEqual
     , SHL, SHR
 
+    , Arrow
 
+    , NoToken // for peekPrev pos < 1
     , EOFToken
 };
 
@@ -91,6 +93,9 @@ inline const char* tokenTypeToString(TokenType type) {
         case TokenType::SHR:            return "Shift Right >>";
 
         case TokenType::Semicolon:     return "Semicolon";
+
+        case TokenType::Arrow:          return "Arrow Pointer access";
+
         case TokenType::EOFToken:      return "EOFToken";
 
         default:                       return "UnknownToken";
@@ -147,6 +152,12 @@ public:
             if (peek() == '/') { advance(); tokens.push_back({TokenType::Div,   "/"}); continue; }
 
             // ----------------------------------------------------------------
+            if (peek() == '-' && peekNext() == '>') {
+                advance();advance();
+                tokens.push_back({TokenType::Arrow, "->"});
+                continue;
+            }
+
             if (peek() == '>' && peekNext() == '>') { advance();advance(); tokens.push_back({TokenType::SHR, ">>"}); continue; }
             if (peek() == '<' && peekNext() == '<') { advance();advance(); tokens.push_back({TokenType::SHL, "<<"}); continue; }
 

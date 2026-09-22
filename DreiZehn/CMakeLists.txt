@@ -20,6 +20,7 @@ project(DreiZehn CXX)
 set(PROJECT_SRC
     engine/Value.h
     engine/ValueObject.h
+    engine/ValueObject.cpp
     engine/Lexer.h
     engine/Parser.h
     engine/AstNode.h

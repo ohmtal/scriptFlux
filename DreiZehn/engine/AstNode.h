@@ -64,7 +64,7 @@ struct VariableExpression : public Expression {
 // function calls --------------------------------------------------------------
 struct CallExpression : public Expression {
     std::string funcName;
-    std::vector<std::unique_ptr<Expression>> arguments; // Argumente sind JETZT selbst Ausdrücke!
+    std::vector<std::unique_ptr<Expression>> arguments;
 
     CallExpression(std::string name, std::vector<std::unique_ptr<Expression>> args)
     : funcName(name), arguments(std::move(args)) {}
@@ -72,6 +72,17 @@ struct CallExpression : public Expression {
     Value evaluate(Environment& env) override;
 };
 
+// method/field on Pointer  calls --------------------------------------------------------------
+struct MethodExpression : public Expression {
+    std::string pointerName;
+    std::string methodName;
+    std::vector<std::unique_ptr<Expression>> arguments;
+
+    MethodExpression(std::string PointerName,std::string MethodName, std::vector<std::unique_ptr<Expression>> args)
+    : pointerName(PointerName), methodName(MethodName), arguments(std::move(args)) {}
+
+    Value evaluate(Environment& env) override;
+};
 // Assingment ------------------------------------------------------------------
 struct AssignStatement : public ASTNode {
     std::string varName;

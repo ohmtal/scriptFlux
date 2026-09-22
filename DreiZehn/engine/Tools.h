@@ -7,10 +7,15 @@
 #pragma once
 #include <stdio.h>
 #include <stdarg.h>
+
+
+
 #include "Globals.h"
+
 
 namespace DreiZehn::Tools{
 
+    // ------------------------------------------------------------------
     // TODO should be redirectable
     inline void printf(const char *format, ...)
     {
@@ -29,9 +34,13 @@ namespace DreiZehn::Tools{
     }
 
     inline void PrintParseError(std::string message) {
-        errorf("Parse Errror in Line [%d]\n%s\n%s\n",
+        errorf("Parse Error in Line [%d]\n%s\n%s\n",
                      Globals::currentScriptLineNumber,
                      Globals::currentScriptLine.c_str(),
                      message.c_str());
+    }
+
+    inline void PrintRuntimeError(std::string message) {
+        errorf("RunTime Error: %s", message.c_str());
     }
 }

@@ -23,6 +23,8 @@ private:
 
     Token peek() { return tokens[pos]; }
     Token peekNext() { if (pos + 1 < tokens.size()) return tokens[pos+1]; else return Token(TokenType::EOFToken); }
+    Token peekNextNext() { if (pos + 2 < tokens.size()) return tokens[pos+2]; else return Token(TokenType::EOFToken); }
+    Token peekPrev() { if (pos > 1) return tokens[pos-1]; else return Token(TokenType::NoToken); }
     Token advance() { if (pos + 1 < tokens.size()) return tokens[pos++]; else return Token(TokenType::EOFToken);}
 
     // -------------------------------------------------------------------------
@@ -76,6 +78,9 @@ private:
             return std::make_unique<LiteralExpression>(t.type, t.value);
         }
 
+
+
+
         if (peek().type == TokenType::Identifier) {
             Token nameToken = advance();
 
@@ -84,6 +89,25 @@ private:
                 return std::make_unique<ValueExpression>((*constansPointer));
             }
 
+            // current peek must be the arrow
+            if (peek().type  == TokenType::Arrow
+                && peekNext().type == TokenType::Identifier
+            ) {
+
+                advance(); // eat ->
+                Token methodToken = advance();
+
+                std::vector<std::unique_ptr<Expression>> args;
+                while (isContinuePeak()) {
+                    size_t lastPos = pos;
+                    args.push_back(parseMath());
+                    if (lastPos == pos) {
+                        Tools::PrintParseError("In method call:");
+                        break;
+                    }
+                }
+                return std::make_unique<MethodExpression>(nameToken.value, methodToken.value, std::move(args));
+            }
 
             if (FunctionMap::IsFunction(nameToken.value)) {
                 std::vector<std::unique_ptr<Expression>> args;
@@ -302,6 +326,10 @@ public:
                 auto rhs = parseComparison();
                 return std::make_unique<AssignStatement>(varName, std::move(rhs));
             }
+            else if (peekNext().type == TokenType::Arrow) {
+                return parsePrimary();
+            }
+
         }
 
         return parseComparison();

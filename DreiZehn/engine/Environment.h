@@ -88,7 +88,7 @@ public:
             return variables.at(name);
         }
         if (parent != nullptr) {
-            return parent->getVariable(name); // Suche im globalen Scope
+            return parent->getVariable(name); // global scope
         }
         Tools::errorf("Variable not found: %s\n", name.c_str());
         return Value();
