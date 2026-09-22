@@ -15,7 +15,6 @@
 namespace DreiZehn {
 
 class Environment;
-class Value;
 
 // base node -------------------------------------------------------------------
 struct ASTNode {
@@ -42,6 +41,17 @@ struct LiteralExpression : public Expression {
     LiteralExpression(TokenType t, std::string val) : type(t), rawValue(std::move(val)) {}
 
     Value evaluate(Environment& env) override;
+};
+
+// Values directly pushed in (ConstantsMap)-------------------------------------------------------------------
+struct ValueExpression : public Expression {
+    Value mValue;
+
+    ValueExpression(const Value& value ) : mValue(value) {}
+
+    inline Value evaluate(Environment& env) override {
+        return mValue;
+    }
 };
 
 // Variables -------------------------------------------------------------------
@@ -82,14 +92,17 @@ struct BinaryExpression : public Expression {
     Value evaluate(Environment& env) override;
 };
 // If -------------------------------------------------------------------------
-struct IfStatement : public ASTNode {
+// struct IfStatement : public ASTNode {
+struct IfStatement : public BlockStatement {
     std::unique_ptr<Expression> condition;
-    std::unique_ptr<ASTNode> thenBranch;
+    // body is defined in BlockStatement
+    std::vector<std::shared_ptr<ASTNode>> elseBody;
+     bool mIsInElseBranch = false;
 
-    IfStatement(std::unique_ptr<Expression> cond, std::unique_ptr<ASTNode> thenB)
-    : condition(std::move(cond)), thenBranch(std::move(thenB)) {}
+    IfStatement(std::unique_ptr<Expression> cond) : condition(std::move(cond)) {}
+
 };
-
+struct ElseMarkerNode: public ASTNode {};
 // fn --------------------------------------------------------------------------
 struct FunctionDefineStartNode : public ASTNode {
     std::string name;

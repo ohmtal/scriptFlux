@@ -6,7 +6,6 @@
 
 #include <string>
 #include <iostream>
-#include "AstNode.h"
 
 namespace DreiZehn{
 

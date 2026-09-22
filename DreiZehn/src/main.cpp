@@ -2,11 +2,13 @@
 #include <iostream>
 #include <sstream>
 
-#include "DreiZehn.h"
+#include "engine/DreiZehn.h"
+#include "engine/DebugFunctions.h"
+#include "engine/SDL3Functions.h"
 
 void RegisterUserFunc() {
     using namespace DreiZehn;
-    FunctionMap::RegisterFunction("foo", [](std::vector<Value>& args, Value& ret) -> bool {
+    FunctionMap::RegisterFunction("fnFoo", [](std::vector<Value>& args, Value& ret) -> bool {
         printf("The Foo was here ...\n");
         ret = Value(4711.0815);
         return true;
@@ -22,7 +24,11 @@ int main(int argc, char* argv[]) {
     Environment env;
     RegisterCoreFunctions(env);
     RegisterMathFunctions();
+    RegisterDebugFunctions();
     RegisterUserFunc();
+
+    RegisterSDL3Functions(env);
+
 
     if (argc > 1) {
         std::string scriptPath = argv[1];

@@ -36,12 +36,15 @@ private:
         || peek().type == TokenType::Div
         || peek().type == TokenType::Greater
         || peek().type == TokenType::Less
-        || peek().type == TokenType::Equal;
+        || peek().type == TokenType::Equal
+        || peek().type == TokenType::NotEqual;
     }
     bool isContinuePeak() {
         return peek().type != TokenType::EOFToken
         && peek().type != TokenType::RParen
         && peek().type != TokenType::Semicolon
+        && peek().type != TokenType::End
+        && peek().type != TokenType::Else
         && !isMathType();
     }
     // -------------------------------------------------------------------------
@@ -67,10 +70,21 @@ private:
         if (peek().type == TokenType::Identifier) {
             Token nameToken = advance();
 
-            if (DreiZehn::FunctionMap::IsFunction(nameToken.value)) {
+            Value* constansPointer = FunctionMap::getConstants(nameToken.value);
+            if (constansPointer != nullptr) {
+                return std::make_unique<ValueExpression>((*constansPointer));
+            }
+
+
+            if (FunctionMap::IsFunction(nameToken.value)) {
                 std::vector<std::unique_ptr<Expression>> args;
                 while (isContinuePeak()) {
+                    size_t lastPos = pos;
                     args.push_back(parseMath());
+                    if (lastPos == pos) {
+                       Tools::PrintParseError("In function call:");
+                       break;
+                    }
 
                 }
                 return std::make_unique<CallExpression>(nameToken.value, std::move(args));
@@ -100,7 +114,9 @@ private:
 
         while (peek().type == TokenType::Greater
             || peek().type == TokenType::Less
-            || peek().type == TokenType::Equal) {
+            || peek().type == TokenType::Equal
+            || peek().type == TokenType::NotEqual
+        ) {
             Token op = advance();
             auto right = parseMath();
             left = std::make_unique<BinaryExpression>(std::move(left), op.type, std::move(right));
@@ -136,7 +152,12 @@ private:
 
                 while (isContinuePeak())
                 {
+                    size_t lastPos = pos;
                     args.push_back(parseMath());
+                    if (lastPos == pos) {
+                        Tools::PrintParseError("In function call:");
+                        break;
+                    }
                 }
                 return std::make_unique<CallExpression>(nameToken.value, std::move(args));
             }
@@ -160,7 +181,7 @@ public:
             }
 
             // FIXME need a toggle command
-            if (Tools::gDumpStateNodes) {
+            if (Globals::gDumpStateNodes) {
                 Tools::printf("---------- new statement ------ Pos:%d \n", (int)pos);
                 for(size_t i = pos; i < tokens.size() ; i++) {
                     Tools::printf("Token %d: %d :: %s\n", i, (int)tokens[i].type, tokenTypeToString(tokens[i].type));
@@ -168,7 +189,7 @@ public:
             }
             size_t startIndex = pos;
             auto stmt = parseLine();
-            if (Tools::gDumpStateNodes) {
+            if (Globals::gDumpStateNodes) {
                 Tools::printf("---------- LINE parsed ------ Pos:%d next:%d :: %s\n", (int)pos, (int)tokens[pos].type, tokenTypeToString(tokens[pos].type));
             }
             if (stmt) {
@@ -235,11 +256,13 @@ public:
         else
         if (peek().type == TokenType::If) {
             advance(); // skip "if"
-
             auto condition = parseComparison();
-            auto thenBranch = parseLine();
-
-            return std::make_unique<IfStatement>(std::move(condition), std::move(thenBranch));
+            return std::make_unique<IfStatement>(std::move(condition));
+        }
+        else
+        if (peek().type == TokenType::Else) {
+            advance(); // skip "else"
+            return std::make_unique<ElseMarkerNode>();
         }
         else
         if (peek().type == TokenType::Break) {

@@ -19,10 +19,11 @@
 #include "AstNode.h"
 #include "Tools.h"
 #include "FunctionMap.h"
+#include "Globals.h"
 
 namespace DreiZehn {
 
-    enum class BlockType { Function, ForLoop, WhileLoop };
+    enum class BlockType { Function, ForLoop, WhileLoop, IfBlock };
 
     struct OpenBlock {
         BlockType type;
@@ -37,8 +38,7 @@ namespace DreiZehn {
         Return
     };
 
-    // i need to track the current Env!
-    static Environment* gCurEnv = nullptr;
+
 
 class Environment {
 private:
@@ -49,22 +49,29 @@ private:
     std::vector<ValueObject*> mGarbageCollection;
     Environment* parent = nullptr;
 public:
-    Environment() : parent(nullptr) {}
+    Environment() : parent(nullptr) {
+        Globals::gCurEnv = this;
+    }
     Environment(Environment* parentEnv) : parent(parentEnv) {
-        gCurEnv = this;
+        Globals::gCurEnv = this;
     }
     ~Environment() {
         doGarbageCollection();
-        if (parent) gCurEnv = parent;
+        if (parent) Globals::gCurEnv = parent;
     }
 
     // -------------------------------------------------------------------------
 
     void setVariable(const std::string& name, Value val) {
-        if (variables.find(name) != variables.end()) {
-            variables[name] = val;
-            return;
+
+        auto it = variables.find(name);
+        if (it != variables.end()) {
+            it->second = val;
         }
+        // if (variables.find(name) != variables.end()) {
+        //     variables[name] = val;
+        //     return;
+        // }
 
         if (parent != nullptr) {
             parent->setVariable(name, val);
@@ -126,13 +133,36 @@ public:
         // --- If-Statement  ---
         else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
             Value condVal = ifStmt->condition->evaluate(currentEnv);
-            bool isTrue = (condVal.isInt() && condVal.asInt() != 0) || (condVal.isDouble() && condVal.asDouble() != 0.0);
+
+            double condNum = condVal.getDouble();
+            const double EPSILON = 1e-9;
+            bool isTrue = std::abs(condNum) > EPSILON;
 
             if (isTrue) {
-                FlowSignal sig = execute(ifStmt->thenBranch.get(), currentEnv);
-                if (sig != FlowSignal::None) return sig;
+                for (auto& childNode : ifStmt->body) {
+                    if (!childNode) continue;
+                    FlowSignal sig = execute(childNode.get(), currentEnv);
+                    if (sig != FlowSignal::None) return sig;
+                }
+            } else {
+                for (auto& childNode : ifStmt->elseBody) {
+                    if (!childNode) continue;
+                    FlowSignal sig = execute(childNode.get(), currentEnv);
+                    if (sig != FlowSignal::None) return sig;
+                }
             }
         }
+
+
+        // else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
+        //     Value condVal = ifStmt->condition->evaluate(currentEnv);
+        //     bool isTrue = (condVal.isInt() && condVal.asInt() != 0) || (condVal.isDouble() && condVal.asDouble() != 0.0);
+        //
+        //     if (isTrue) {
+        //         FlowSignal sig = execute(ifStmt->thenBranch.get(), currentEnv);
+        //         if (sig != FlowSignal::None) return sig;
+        //     }
+        // }
         // ---- for statement .....
         else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
             Value startVal = forStmt->startExpr->evaluate(currentEnv);
@@ -193,12 +223,12 @@ public:
 
     // -------------------------------------------------------------------------
     // main execute
-    void execute(ASTNode* node) {
-         execute(node, *this);
+    inline FlowSignal execute(ASTNode* node) {
+         return execute(node, *this);
     }
     // -------------------------------------------------------------------------
     void shutDown() {
-        doGarbageCollection();
+        // done be destuctor: doGarbageCollection();
     }
 }; //Class
 } //Namespace

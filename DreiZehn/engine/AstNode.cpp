@@ -33,24 +33,30 @@ namespace DreiZehn {
     }
     // -------------------------------------------------------------------------
     Value CallExpression::evaluate(Environment& env) {
-        if (FunctionMap::IsCFunction(funcName)) {
+        FunctionMap::CallBack* cb = nullptr;
+        cb = FunctionMap::GetCFunction(funcName);
+        if (cb) {
 
             std::vector<Value> evaluatedArgs;
             for (auto& argExpr : arguments) {
-                evaluatedArgs.push_back(argExpr->evaluate(env));
+                if (argExpr) evaluatedArgs.push_back(argExpr->evaluate(env));
             }
 
             Value returnValue;
-            bool success = FunctionMap::RegisteredFunctions[funcName](evaluatedArgs, returnValue);
+            // bool success = FunctionMap::RegisteredFunctions[funcName](evaluatedArgs, returnValue);
+            bool success = (*cb)(evaluatedArgs, returnValue);
 
             if (!success) {
                 Tools::errorf("Error in function: %s\n", funcName.c_str());
             }
             return returnValue;
         }
-        else
-        if (FunctionMap::IsScriptFunction(funcName)) {
-            auto& func = FunctionMap::RegisteredScriptFunctions[funcName];
+
+        const FunctionMap::ScriptFunction* sf = FunctionMap::GetScriptFunction(funcName);
+
+        if (sf) {
+            // auto& func = FunctionMap::RegisteredScriptFunctions[funcName];
+            auto& func = *(sf);
             Environment localEnv(&env);
 
             for (size_t i = 0; i < func.parameterNames.size(); ++i) {
@@ -71,43 +77,51 @@ namespace DreiZehn {
 
             return functionResult;
         }
-        else {
-            Tools::errorf("Unknown command: %s\n", funcName.c_str());
-            return Value();
-        }
+
+        Tools::errorf("Unknown command: %s\n", funcName.c_str());
+        return Value();
 
     }
     // -------------------------------------------------------------------------
 
     Value BinaryExpression::evaluate(Environment& env)  {
         if (!left.get() || !right.get()) {
-            Tools::errorf("Parse Error!");
+            Tools::PrintParseError("left or right is missing:");
             return Value();
         }
         Value lVal = left->evaluate(env);
         Value rVal = right->evaluate(env);
 
-
-        if ((!lVal.isDouble() && !lVal.isInt()) || (!rVal.isDouble() && !rVal.isInt()) ) {
-            Tools::errorf("TYPE ERROR: We need numbers here");
-            return Value();
-        }
-
         if (op == TokenType::Greater) {
-            double l = lVal.isInt() ? lVal.asInt() : lVal.asDouble();
-            double r = rVal.isInt() ? rVal.asInt() : rVal.asDouble();
-            return Value(l > r ? 1 : 0);
+            double l = lVal.getDouble();
+            double r = rVal.getDouble();
+            return Value((l - r) > EPSILON ? 1 : 0);
         }
+        else
         if (op == TokenType::Less) {
-            double l = lVal.isInt() ? lVal.asInt() : lVal.asDouble();
-            double r = rVal.isInt() ? rVal.asInt() : rVal.asDouble();
-            return Value(l < r ? 1 : 0);
+            double l = lVal.getDouble();
+            double r = rVal.getDouble();
+            return Value((r - l) > EPSILON ? 1 : 0);
         }
+        else
         if (op == TokenType::Equal) {
-            double l = lVal.isInt() ? lVal.asInt() : lVal.asDouble();
-            double r = rVal.isInt() ? rVal.asInt() : rVal.asDouble();
-            return Value(l == r ? 1 : 0);
+            if (lVal.isPointer() && rVal.isPointer()) {
+                return Value(lVal.asPointer() == rVal.asPointer() ? 1 : 0);
+            }
+            double l = lVal.getDouble();
+            double r = rVal.getDouble();
+            return Value(std::abs(l - r) < EPSILON ? 1 : 0);
         }
+        else
+        if (op == TokenType::NotEqual) {
+            if (lVal.isPointer() && rVal.isPointer()) {
+                return Value(lVal.asPointer() != rVal.asPointer() ? 1 : 0);
+            }
+            double l = lVal.getDouble();
+            double r = rVal.getDouble();
+            return Value(std::abs(l - r) < EPSILON ? 0 : 1);
+        }
+
 
         if (lVal.isInt() && rVal.isInt()) {
             if (op == TokenType::Plus) return Value(lVal.asInt() + rVal.asInt());
@@ -115,8 +129,8 @@ namespace DreiZehn {
             if (op == TokenType::Mul) return Value(lVal.asInt() * rVal.asInt());
             if (op == TokenType::Div) return Value(lVal.asInt() / rVal.asInt());
         }
-        double lNum = lVal.isInt() ? lVal.asInt() : lVal.asDouble();
-        double rNum = rVal.isInt() ? rVal.asInt() : rVal.asDouble();
+        double lNum = lVal.getDouble();
+        double rNum = rVal.getDouble();
 
         if (op == TokenType::Plus) return Value(lNum + rNum);
         if (op == TokenType::Minus) return Value(lNum - rNum);

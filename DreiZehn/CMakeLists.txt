@@ -10,27 +10,41 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+
+set(SANITIZE_DEFAULT OFF)
+set(BUILD_WITH_SANITIZE ${SANITIZE_DEFAULT} CACHE BOOL "Build Application with -fsanitize=address -g")
+
 # -----------------------------------------------------------------------------
 project(DreiZehn CXX)
 
 set(PROJECT_SRC
-    src/Value.h
-    src/ValueObject.h
-    src/Lexer.h
-    src/Parser.h
-    src/AstNode.h
-    src/AstNode.cpp
-    src/Environment.h
-    src/Tools.h
-    src/CoreFunctions.h
+    engine/Value.h
+    engine/ValueObject.h
+    engine/Lexer.h
+    engine/Parser.h
+    engine/AstNode.h
+    engine/AstNode.cpp
+    engine/Environment.h
+    engine/Tools.h
+    engine/CoreFunctions.h
+    engine/MathFunctions.h
+    engine/DebugFunctions.h
 
-    src/ScriptLoader.h
-    src/ScriptLoader.cpp
+    engine/ScriptLoader.h
+    engine/ScriptLoader.cpp
 
-    src/DreiZehn.h
+    engine/Globals.h
+    engine/DreiZehn.h
+
+    # --- testing SDL3 bindings
+    engine/SDL3Functions.h
+
 
     src/main.cpp
 )
+
+# ------------- SDL3
+find_package(SDL3 REQUIRED)
 
 # ------------- Main
 add_executable(${PROJECT_NAME}
@@ -44,7 +58,14 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE
+     "${CMAKE_CURRENT_SOURCE_DIR}/"
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    SDL3::SDL3
 )
+
+if (BUILD_WITH_SANITIZE)
+    target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -g)
+    target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+endif()

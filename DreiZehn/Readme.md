@@ -146,3 +146,45 @@ run "test_suite.13"
 * **Infinite Loop Prevention:** Parser-level locks intercept stalled index trackers and throw non-blocking compiler alerts.
 * **String Memory Safety:** The lexer forces automatic emergency lookbehinds on unclosed string sequences (`"hello...`) to prevent state corruption.
 * **Garbage Collection (GC):** `Environment::shutdown()` walks through all dynamically tracked memory nodes upon exit to prevent memory leaks in the host C++ application.
+
+
+## 9. Basic SDL3 implementation 
+
+Version 0.3: I added SDL3 to test my Script system:
+
+```
+SDL_Init SDL_INIT_VIDEO
+
+Window = SDL_CreateWindow "Hello 13" 320 200 SDL_WINDOW_RESIZABLE
+Renderer = SDL_CreateRenderer Window "opengl"
+Event = SDL_CreateEvent
+
+Running = true
+while Running
+    while SDL_PollEvent Event
+        Type = SDL_GetEventType Event
+        if Type == SDL_EVENT_QUIT
+            Running = false
+        end
+
+        if Type == SDL_EVENT_KEY_DOWN
+            Key = SDL_GetEventKey Event
+            if Key == SDLK_ESCAPE
+                Running = false
+            end
+        end
+    end
+
+    SDL_SetRenderDrawColor Renderer 30 30 40 255
+    SDL_RenderClear Renderer
+
+    SDL_SetRenderDrawColor Renderer 255 255 255 255
+    SDL_RenderDebugText Renderer 10 10 "Hello SDL3 with events"
+
+    SDL_RenderPresent Renderer
+    SDL_Delay 16
+end
+
+SDL_DestroyWindow Window
+SDL_Quit
+```

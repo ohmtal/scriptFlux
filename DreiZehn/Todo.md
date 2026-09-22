@@ -14,25 +14,25 @@ It needs to be done in "end"
 
 - add some basic SDL3 bindings ;) Test if i can use my ElfScript macros - but i 
 don't have to PoD Types here at the moment. 
-- setup projecct
-- add bindings:
-    - SDL_CreateWindow("Crazy Elf.", $WindowSize.x, $WindowSize.y, %flags);
-    - SDL_CreateRenderer(%this.window);
-    - SDL_DestroyRenderer(%this.renderer);
-    - SDL_DestroyWindow(%this.window);
-    - SDL_RenderPresent(%this.renderer);
-    - SDL_RenderDebugText(%this.renderer, %x /%scale , %y/%scale, %text );
-    - SDL_SetRenderScale(%this.renderer, 1.0, 1.0);
-    - SDL_SetRenderDrawColor(%renderer, 20, 20, 60);
-    - SDL_RenderClear(%renderer);
-    - SDL_RenderFillRect
-    - SDL_GetTicks();
-    -  SDL_Delay(10);
-    - isKeyPressed ?!
-    
+- [X] setup projecct Simply Added to current CMake
+- [X] add some basic bindings
+- [X] fixed if statement broken afer while inserted
+- [X] added getDouble/getInt for auto type convert
+- [X] BinaryExpression::evaluate uses getDouble
+- [X] Added else and finally fixed If as BlockStatement - run in a own execute !! .. variables ?!?
+- [X] "!=" as compare 
+- [X] add a constant system ...
+
 - write the starfield demo in DreiZehn
 - local / global var is sometime mixed - since we fetch a global it is not found on local scope
-but it's a bit unclear when its global and when its local
+but it's a bit unclear when its global and when its local. 
+
+# 0.4
+- how does it handle => If myFunc 10 20 == 0 ? 
+- true and false is missing 
+- ~~'!=' and~~ '!' is missing
+- else is missing 
+- Preprocessor constants from ElfScript
 
 # future ideas
 

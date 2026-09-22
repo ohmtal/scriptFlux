@@ -5,7 +5,6 @@
 // Core Commands
 //-----------------------------------------------------------------------------
 #pragma once
-#include <ctime>
 #include "FunctionMap.h"
 #include "ScriptLoader.h"
 
@@ -13,8 +12,12 @@ namespace DreiZehn {
 
 
     void RegisterCoreFunctions( Environment& env) {
-
         using namespace FunctionMap;
+        // ---------------------------------------------------------------------
+        // also push some CORE Constants here:
+        RegisterConstants("true", Value(1));
+        RegisterConstants("false", Value(0));
+        // ---------------------------------------------------------------------
         // -------- print --------------
         RegisterFunction("print", [](std::vector<Value>& args, Value& ret) -> bool {
             for (const auto& val : args) {
@@ -27,6 +30,8 @@ namespace DreiZehn {
                     if (obj->type == ValueObjectType::String) {
                         auto* strObj = static_cast<StringValueObject*>(obj);
                         Tools::printf("%s ", strObj->value.c_str());
+                    } else {
+                        Tools::printf("%p ", (void*)obj);
                     }
                 }
             }
@@ -34,7 +39,7 @@ namespace DreiZehn {
             return true;
         });
 
-
+        // ---------------------------------------------------------------------
         DreiZehn::FunctionMap::RegisterFunction("run", [&env](std::vector<Value>& args, Value& ret) -> bool {
             if (args.size() < 1) {
                 Tools::errorf("file name requires for run\n");
@@ -57,7 +62,7 @@ namespace DreiZehn {
             Tools::errorf("file name requires for run\n");
             return false;
         });
-        // ------------------------------------------
+        // ---------------------------------------------------------------------
         DreiZehn::FunctionMap::RegisterFunction("concat", [&env](std::vector<Value>& args, Value& ret) -> bool {
             std::string resultStr = "";
 
@@ -86,12 +91,7 @@ namespace DreiZehn {
             return true;
         });
 
-        // ------------------------------------------
-        RegisterFunction("toggleDebug", [](std::vector<Value>& args, Value& ret) -> bool {
-            Tools::gDumpStateNodes = ! Tools::gDumpStateNodes;
-            return true;
-        });
-        // ------------------------------------------
+        // ---------------------------------------------------------------------
 
     } //RegisterCoreFunctions
 

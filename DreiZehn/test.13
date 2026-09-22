@@ -1,11 +1,27 @@
 # Test for DreiZehn Script
 print "--- Run Engine-Test ---"
 
+foo = 1
+if ( foo == 0 )
+    print "Foo ist:" foo
+end
+print "......."
+
+return
+
+-- WORKS NOW :)
+-- -- return
+-- -- print "--- RETURN but still here ?  ---"
+
+
 # functions
 fn calc faktor
     result = (faktor * 10) + 5
     print result
+    return result
 end
+print "calc with return:" calc 10
+
 
 # loop
 for i 1 3
