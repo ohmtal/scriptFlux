@@ -29,21 +29,16 @@ namespace DreiZehn {
         int lineCount = 0;
         bool doOutBreak = false;
 
-        // std::vector<std::unique_ptr<ASTNode>> allStatements;
-
 
         while (std::getline(stream, line) && !doOutBreak) {
             lineCount++;
-            Globals::currentScriptLine = lineCount;
+            Globals::currentScriptLineNumber = lineCount;
 
             size_t firstRealChar = line.find_first_not_of(" \t\r\n");
             if (firstRealChar == std::string::npos) continue;
 
             // shell script style
             if (line[firstRealChar] == '#') continue;
-
-
-
 
             // lua style - because lua Syntax highlight is ok for DreiZehn ;)
             if (line[firstRealChar] == '-' &&
@@ -59,10 +54,9 @@ namespace DreiZehn {
 
             auto statements = parser.parseStatements();
 
-            // NOT faster! std::ranges::move(statements, std::back_inserter(allStatements));
-            // but maybe usful to store the prog ? .. but for what
-        // };
-
+            // --------------------------------
+            // Run LineStatements
+            // --------------------------------
 
             for (auto& ast : statements) {
             // for (auto& ast : allStatements) {
@@ -82,11 +76,8 @@ namespace DreiZehn {
                     std::shared_ptr<ASTNode> sharedBase = std::move(ast);
                     std::shared_ptr<BlockStatement> sharedLoop = std::static_pointer_cast<BlockStatement>(sharedBase);
 
-                    // BlockType bType = isFor ? BlockType::ForLoop : BlockType::WhileLoop;
-                    // blockStack.push_back({bType, "", sharedLoop.get()});
                     BlockType bType;
-                    BlockStatement* blockPtr = nullptr; // Oder Basis-Typ, von dem deine Stmts erben
-
+                    BlockStatement* blockPtr = nullptr;
                     if (isIf) {
                         bType = BlockType::IfBlock;
                         blockPtr = dynamic_cast<BlockStatement*>(sharedBase.get());
@@ -99,23 +90,23 @@ namespace DreiZehn {
                     // ------
                     if (blockStack.size() > 1) {
                         auto& outerBlock = blockStack[blockStack.size() - 2];
-                        if (outerBlock.type == BlockType::Function) {
-                            FunctionMap::RegisteredScriptFunctions[outerBlock.funcName].body.push_back(sharedLoop);
+                        if (outerBlock.mType == BlockType::Function) {
+                            FunctionMap::RegisteredScriptFunctions[outerBlock.mFuncName].body.push_back(sharedLoop);
                         }
-                        else if (outerBlock.type == BlockType::ForLoop) {
-                            auto* actualFor = dynamic_cast<ForStatement*>(outerBlock.blockNodePointer);
+                        else if (outerBlock.mType == BlockType::ForLoop) {
+                            auto* actualFor = dynamic_cast<ForStatement*>(outerBlock.mBlockNodePointer);
                             if (actualFor) {
                                 actualFor->body.push_back(sharedLoop);
                             }
                         }
-                        else if (outerBlock.type == BlockType::WhileLoop) {
-                            auto* actualWhile = dynamic_cast<WhileStatement*>(outerBlock.blockNodePointer);
+                        else if (outerBlock.mType == BlockType::WhileLoop) {
+                            auto* actualWhile = dynamic_cast<WhileStatement*>(outerBlock.mBlockNodePointer);
                             if (actualWhile) {
                                 actualWhile->body.push_back(sharedLoop);
                             }
                         }
-                        else if (outerBlock.type == BlockType::IfBlock) {
-                            auto* actualIf = dynamic_cast<IfStatement*>(outerBlock.blockNodePointer);
+                        else if (outerBlock.mType == BlockType::IfBlock) {
+                            auto* actualIf = dynamic_cast<IfStatement*>(outerBlock.mBlockNodePointer);
                             if (actualIf) actualIf->body.push_back(sharedBase);
                         }
                     } else {
@@ -129,30 +120,30 @@ namespace DreiZehn {
 
                 if (dynamic_cast<FunctionDefineEndNode*>(ast.get())) {
                     if (blockStack.empty()) {
-                        Tools::errorf("[Line %d] Syntax-Error: 'end' without starting statement.\n", Globals::currentScriptLine);
+                        Tools::PrintParseError("Syntax-Error: 'end' without starting statement.");
                         return false;
                     }
 
                     OpenBlock closingBlock = blockStack.back();
                     blockStack.pop_back();
 
-                    if ((closingBlock.type == BlockType::ForLoop
-                        || closingBlock.type == BlockType::WhileLoop
-                        || closingBlock.type == BlockType::IfBlock)
+                    if ((closingBlock.mType == BlockType::ForLoop
+                        || closingBlock.mType == BlockType::WhileLoop
+                        || closingBlock.mType == BlockType::IfBlock)
                         && blockStack.empty()) {
-                        env.execute(closingBlock.blockNodePointer);
+                        env.execute(closingBlock.mBlockNodePointer);
                     }
                     continue;
                 }
                 // --- else ---
                 if (dynamic_cast<ElseMarkerNode*>(ast.get())) {
-                    if (blockStack.empty() || blockStack.back().type != BlockType::IfBlock) {
-                        Tools::errorf("[Line %d] Syntax-Error: 'else' without matching 'if'.\n", lineCount);
+                    if (blockStack.empty() || blockStack.back().mType != BlockType::IfBlock) {
+                        Tools::PrintParseError("Syntax-Error: 'else' without matching 'if'.");
                         return false;
                     }
 
                     auto& currentBlock = blockStack.back();
-                    auto* actualIf = dynamic_cast<IfStatement*>(currentBlock.blockNodePointer);
+                    auto* actualIf = dynamic_cast<IfStatement*>(currentBlock.mBlockNodePointer);
                     if (actualIf) {
                         // rewrite
                         actualIf->mIsInElseBranch = true;
@@ -164,15 +155,12 @@ namespace DreiZehn {
                     auto& currentBlock = blockStack.back();
                     std::shared_ptr<ASTNode> sharedAst = std::move(ast);
 
-                    if (currentBlock.type == BlockType::Function) {
-                        FunctionMap::RegisteredScriptFunctions[currentBlock.funcName].body.push_back(sharedAst);
-                    } else if (currentBlock.type == BlockType::ForLoop || currentBlock.type == BlockType::WhileLoop) {
-                        currentBlock.blockNodePointer->body.push_back(sharedAst);
-                    } else if (currentBlock.type == BlockType::IfBlock) {
-                        // pre else:
-                        // auto* actualIf = dynamic_cast<IfStatement*>(currentBlock.blockNodePointer);
-                        // if (actualIf) actualIf->body.push_back(sharedAst);
-                        auto* actualIf = dynamic_cast<IfStatement*>(currentBlock.blockNodePointer);
+                    if (currentBlock.mType == BlockType::Function) {
+                        FunctionMap::RegisteredScriptFunctions[currentBlock.mFuncName].body.push_back(sharedAst);
+                    } else if (currentBlock.mType == BlockType::ForLoop || currentBlock.mType == BlockType::WhileLoop) {
+                        currentBlock.mBlockNodePointer->body.push_back(sharedAst);
+                    } else if (currentBlock.mType == BlockType::IfBlock) {
+                        auto* actualIf = dynamic_cast<IfStatement*>(currentBlock.mBlockNodePointer);
                         if (actualIf) {
                             if (actualIf->mIsInElseBranch) {
                                 actualIf->elseBody.push_back(sharedAst);
@@ -183,7 +171,6 @@ namespace DreiZehn {
                     }
 
                 } else {
-                    // DEBUG
                     FlowSignal sig = env.execute(ast.get());
                     if (sig == FlowSignal::Return) {
                         doOutBreak = true;

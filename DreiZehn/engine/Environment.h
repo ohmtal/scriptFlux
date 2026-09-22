@@ -26,9 +26,9 @@ namespace DreiZehn {
     enum class BlockType { Function, ForLoop, WhileLoop, IfBlock };
 
     struct OpenBlock {
-        BlockType type;
-        std::string funcName;
-        BlockStatement* blockNodePointer;
+        BlockType mType;
+        std::string mFuncName;
+        BlockStatement* mBlockNodePointer;
     };
 
 
@@ -43,52 +43,49 @@ namespace DreiZehn {
 class Environment {
 private:
     // variables stack
-    std::unordered_map<std::string, Value> variables;
+    std::unordered_map<std::string, Value> mVariables;
 
     // Garbage collection
     std::vector<ValueObject*> mGarbageCollection;
-    Environment* parent = nullptr;
+    Environment* mParentEnv = nullptr;
 public:
-    Environment() : parent(nullptr) {
+    Environment() : mParentEnv(nullptr) {
         Globals::gCurEnv = this;
     }
-    Environment(Environment* parentEnv) : parent(parentEnv) {
+    Environment(Environment* parentEnv) : mParentEnv(parentEnv) {
         Globals::gCurEnv = this;
     }
     ~Environment() {
         doGarbageCollection();
-        if (parent) Globals::gCurEnv = parent;
+        if (mParentEnv) Globals::gCurEnv = mParentEnv;
     }
 
     // -------------------------------------------------------------------------
 
     void setVariable(const std::string& name, Value val) {
 
-        auto it = variables.find(name);
-        if (it != variables.end()) {
+        auto it = mVariables.find(name);
+        if (it != mVariables.end()) {
             it->second = val;
         }
-        // if (variables.find(name) != variables.end()) {
-        //     variables[name] = val;
-        //     return;
-        // }
 
-        if (parent != nullptr) {
-            parent->setVariable(name, val);
+
+        if (mParentEnv != nullptr) {
+            mParentEnv->setVariable(name, val);
             return;
         }
 
-        variables[name] = val;
+        mVariables[name] = val;
     }
 
 
 
     Value getVariable(const std::string& name) {
-        if (variables.find(name) != variables.end()) {
-            return variables.at(name);
+        if (mVariables.find(name) != mVariables.end()) {
+            return mVariables.at(name);
         }
-        if (parent != nullptr) {
-            return parent->getVariable(name); // global scope
+        if (mParentEnv != nullptr) {
+            return mParentEnv->getVariable(name); // global scope
         }
         Tools::errorf("Variable not found: %s\n", name.c_str());
         return Value();
@@ -154,15 +151,6 @@ public:
         }
 
 
-        // else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
-        //     Value condVal = ifStmt->condition->evaluate(currentEnv);
-        //     bool isTrue = (condVal.isInt() && condVal.asInt() != 0) || (condVal.isDouble() && condVal.asDouble() != 0.0);
-        //
-        //     if (isTrue) {
-        //         FlowSignal sig = execute(ifStmt->thenBranch.get(), currentEnv);
-        //         if (sig != FlowSignal::None) return sig;
-        //     }
-        // }
         // ---- for statement .....
         else if (auto* forStmt = dynamic_cast<ForStatement*>(node)) {
             Value startVal = forStmt->startExpr->evaluate(currentEnv);

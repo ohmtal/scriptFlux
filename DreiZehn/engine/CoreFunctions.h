@@ -27,9 +27,9 @@ namespace DreiZehn {
                     Tools::printf("%f ", val.asDouble());
                 } else if (val.isPointer()) {
                     auto* obj = static_cast<ValueObject*>(val.asPointer());
-                    if (obj->type == ValueObjectType::String) {
+                    if (obj->mType == ValueObjectType::String) {
                         auto* strObj = static_cast<StringValueObject*>(obj);
-                        Tools::printf("%s ", strObj->value.c_str());
+                        Tools::printf("%s ", strObj->mValue.c_str());
                     } else {
                         Tools::printf("%p ", (void*)obj);
                     }
@@ -48,11 +48,11 @@ namespace DreiZehn {
 
             if (args[0].isPointer()) {
                 auto* obj = static_cast<ValueObject*>(args[0].asPointer());
-                if (obj->type == ValueObjectType::String) {
+                if (obj->mType == ValueObjectType::String) {
                     auto* strObj = static_cast<StringValueObject*>(obj);
 
-                    Tools::printf("Loading Script: %s\n", strObj->value.c_str());
-                    bool success = RunScriptFile(strObj->value, env);
+                    Tools::printf("Loading Script: %s\n", strObj->mValue.c_str());
+                    bool success = RunScriptFile(strObj->mValue, env);
 
                     ret = Value(success ? 1 : 0);
                     return success;
@@ -78,9 +78,9 @@ namespace DreiZehn {
                 }
                 else if (val.isPointer()) {
                     auto* obj = static_cast<ValueObject*>(val.asPointer());
-                    if (obj && obj->type == ValueObjectType::String) {
+                    if (obj && obj->mType == ValueObjectType::String) {
                         auto* strObj = static_cast<StringValueObject*>(obj);
-                        resultStr += strObj->value;
+                        resultStr += strObj->mValue;
                     }
                 }
             }

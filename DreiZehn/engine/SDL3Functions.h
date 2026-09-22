@@ -122,7 +122,7 @@ namespace DreiZehn {
                 return false;
             }
 
-            const char* title = (args[0].getStringObj()) ? args[0].getStringObj()->value.c_str() : "";
+            const char* title = (args[0].getStringObj()) ? args[0].getStringObj()->mValue.c_str() : "";
             SDL_Window* win = SDL_CreateWindow(
                 title,
                 args[1].getInt(),
@@ -166,7 +166,7 @@ namespace DreiZehn {
                 Tools::errorf("SDL_CreateRenderer: Invalid SDL_Window!\n");
                 return false;
             }
-            const char* name = (args.size() > 1 && args[1].getStringObj()) ? args[1].getStringObj()->value.c_str() : nullptr;
+            const char* name = (args.size() > 1 && args[1].getStringObj()) ? args[1].getStringObj()->mValue.c_str() : nullptr;
 
             SDL_Renderer* rend = SDL_CreateRenderer(winObj->value, name);
             if (!rend) {
@@ -296,7 +296,7 @@ namespace DreiZehn {
 
             float x = static_cast<float>(args[1].getFloat());
             float y = static_cast<float>(args[2].getFloat());
-            const char* str = (args[3].getStringObj()) ? args[3].getStringObj()->value.c_str() : "";
+            const char* str = (args[3].getStringObj()) ? args[3].getStringObj()->mValue.c_str() : "";
 
             ret = Value(SDL_RenderDebugText(rendObj->value, x, y, str));
             return true;

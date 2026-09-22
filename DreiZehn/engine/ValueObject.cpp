@@ -21,8 +21,8 @@ namespace DreiZehn {
 
         if (methodName == "toNumber") {
             char* endptr = nullptr;
-            double resDouble = std::strtod(value.c_str(), &endptr);
-            if (value.empty() || *endptr != '\0') {
+            double resDouble = std::strtod(mValue.c_str(), &endptr);
+            if (mValue.empty() || *endptr != '\0') {
                 ret = Value(0);
             } else {
                 ret = Value(resDouble);

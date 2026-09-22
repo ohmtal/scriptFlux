@@ -113,7 +113,7 @@ public:
     inline StringValueObject* getStringObj() {
         if (this->isPointer()) {
             auto* obj = static_cast<ValueObject*>(this->asPointer());
-            if (obj->type == ValueObjectType::String) {
+            if (obj->mType == ValueObjectType::String) {
                 auto* strObj = static_cast<StringValueObject*>(obj);
                 return strObj;
             }

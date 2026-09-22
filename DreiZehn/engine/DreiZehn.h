@@ -7,9 +7,9 @@
 #pragma once
 
 #include "Environment.h"
-#include "Lexer.h"
-#include "Parser.h"
-#include "Tools.h"
+// #include "Lexer.h"
+// #include "Parser.h"
+// #include "Tools.h"
 #include "CoreFunctions.h"
 #include "MathFunctions.h"
 
