@@ -7,6 +7,7 @@
 #include "Environment.h"
 #include "FunctionMap.h"
 
+
 namespace DreiZehn {
     // -------------------------------------------------------------------------
     Value LiteralExpression::evaluate(Environment& env) {
@@ -28,12 +29,12 @@ namespace DreiZehn {
     }
     // -------------------------------------------------------------------------
     Value VariableExpression::evaluate(Environment& env) {
-        return env.getVariable(mName);
+        return env.getVariable(SymbolTable::insert(mName));
 
     }
     // -------------------------------------------------------------------------
     Value MethodExpression::evaluate(Environment& env) {
-        Value objectPointer = env.getVariable(mPointerName);
+        Value objectPointer = env.getVariable(SymbolTable::insert(mPointerName));
         if (!objectPointer.isPointer()) {
             Tools::errorf("RunTime Error: Object %s not found.\n", mPointerName.c_str());
             return Value();
@@ -87,7 +88,7 @@ namespace DreiZehn {
             for (size_t i = 0; i < func.parameterNames.size(); ++i) {
                 if (i < arguments.size()) {
                     Value evaluatedArg = arguments[i]->evaluate(env);
-                    localEnv.setVariable(func.parameterNames[i], evaluatedArg);
+                    localEnv.setVariable(SymbolTable::insert(func.parameterNames[i]), evaluatedArg);
                 }
             }
             Value functionResult = Value(0);
@@ -95,7 +96,7 @@ namespace DreiZehn {
                 FlowSignal sig = env.execute(statement.get(), localEnv);
 
                 if (sig == FlowSignal::Return) {
-                    Value retVal = localEnv.getVariable("__return_value__");
+                    Value retVal = localEnv.getVariable(SymbolTable::insert("__return_value__"));
                     return retVal;
                 }
             }

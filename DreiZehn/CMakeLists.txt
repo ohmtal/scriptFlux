@@ -35,6 +35,8 @@ set(PROJECT_SRC
     engine/ScriptLoader.cpp
     engine/ArrayFunctions.h
 
+    engine/SymbolTable.h
+
     engine/Globals.h
     engine/DreiZehn.h
 
