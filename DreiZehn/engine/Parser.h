@@ -236,7 +236,9 @@ public:
                 advance();
             }
             else if (mPos == startIndex) {
-                Tools::errorf("Syntax-Error: Unexpected token '%s'\n", tokenTypeToString(mTokens[mPos].mType));
+                Tools::errorf("Syntax-Error: Unexpected token '%s' (%s:%d)\n"
+                , tokenTypeToString(mTokens[mPos].mType),Globals::currentScriptLine.c_str()
+                , Globals::currentScriptLineNumber );
                 advance();
             }
         }

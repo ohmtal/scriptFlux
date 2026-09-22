@@ -28,7 +28,6 @@ namespace DreiZehn {
 
     struct OpenBlock {
         BlockType mType;
-        // std::string mFuncName;
         uint32_t mFuncNameSymbolId;
         BlockStatement* mBlockNodePointer;
     };
@@ -157,6 +156,10 @@ public:
     inline FlowSignal execute(ASTNode* node, Environment& currentEnv) {
         if (!node) return FlowSignal::None;
 
+        //NOTE HARDCORE DEBUG
+        // std::cout << "DEBUG-EXECUTE: Node-Typ: " << typeid(*node).name() << "\n";
+
+
         // --- Break Statement ---
         if (dynamic_cast<BreakStatement*>(node)) {
             return FlowSignal::Break;
@@ -248,6 +251,18 @@ public:
                 }
             }
         }
+        // --- BlockStatement  ---
+        else
+        if (auto* block = dynamic_cast<BlockStatement*>(node)) {
+            for (auto& statement : block->mBody) {
+                if (!statement) continue;
+                FlowSignal sig = execute(statement.get(), *this);
+                if (sig != FlowSignal::None) return sig;
+            }
+            return FlowSignal::None;
+        }
+
+
         // --- others ---
         else if (auto* expr = dynamic_cast<Expression*>(node)) {
             expr->evaluate(currentEnv);
