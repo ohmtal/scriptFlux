@@ -79,12 +79,10 @@ private:
         }
 
 
-
-
         if (peek().mType == TokenType::Identifier) {
             Token nameToken = advance();
-
-            Value* constansPointer = FunctionMap::getConstants(nameToken.mValue);
+            uint32_t nameTokenSymbolId = SymbolTable::insert( nameToken.mValue);
+            Value* constansPointer = FunctionMap::getConstants(nameTokenSymbolId);
             if (constansPointer != nullptr) {
                 return std::make_unique<ValueExpression>((*constansPointer));
             }
@@ -106,10 +104,12 @@ private:
                         break;
                     }
                 }
-                return std::make_unique<MethodExpression>(nameToken.mValue, methodToken.mValue, std::move(args));
+                // return std::make_unique<MethodExpression>(nameToken.mValue, methodToken.mValue, std::move(args));
+                return std::make_unique<MethodExpression>(nameTokenSymbolId
+                    , SymbolTable::insert(methodToken.mValue), std::move(args));
             }
 
-            if (FunctionMap::IsFunction(nameToken.mValue)) {
+            if (FunctionMap::IsFunction(nameTokenSymbolId)) {
                 std::vector<std::unique_ptr<Expression>> args;
                 while (isContinuePeak()) {
                     size_t lastPos = mPos;
@@ -120,10 +120,11 @@ private:
                     }
 
                 }
-                return std::make_unique<CallExpression>(nameToken.mValue, std::move(args));
+                return std::make_unique<CallExpression>(nameTokenSymbolId, std::move(args));
             }
 
-            return std::make_unique<VariableExpression>(nameToken.mValue);
+            // return std::make_unique<VariableExpression>(nameToken.mValue);
+            return std::make_unique<VariableExpression>(nameTokenSymbolId);
         }
 
         return nullptr;
@@ -181,8 +182,9 @@ private:
 
         if (peek().mType == TokenType::Identifier) {
             Token nameToken = advance();
+            uint32_t nameTokenSymbolId = SymbolTable::insert(nameToken.mValue);
 
-            if (FunctionMap::IsFunction(nameToken.mValue)) {
+            if (FunctionMap::IsFunction(nameTokenSymbolId)) {
                 std::vector<std::unique_ptr<Expression>> args;
 
                 while (isContinuePeak())
@@ -194,10 +196,10 @@ private:
                         break;
                     }
                 }
-                return std::make_unique<CallExpression>(nameToken.mValue, std::move(args));
+                return std::make_unique<CallExpression>(nameTokenSymbolId, std::move(args));
             }
 
-            return std::make_unique<VariableExpression>(nameToken.mValue);
+            return std::make_unique<VariableExpression>(nameTokenSymbolId);
         }
 
         return nullptr;
@@ -253,13 +255,14 @@ public:
             }
 
             std::string funcName = advance().mValue;
+            uint32_t funcNameSymbolId = SymbolTable::insert(funcName);
             std::vector<std::string> params;
 
             while (peek().mType == TokenType::Identifier) {
                 params.push_back(advance().mValue);
             }
-            FunctionMap::RegisteredScriptFunctions[funcName] = { params, {} };
-            return std::make_unique<FunctionDefineStartNode>(funcName);
+            FunctionMap::RegisteredScriptFunctions[funcNameSymbolId] = { params, {} };
+            return std::make_unique<FunctionDefineStartNode>(funcNameSymbolId);
         }
         else
         if (peek().mType == TokenType::For) {

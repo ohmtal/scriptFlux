@@ -29,19 +29,21 @@ namespace DreiZehn {
     }
     // -------------------------------------------------------------------------
     Value VariableExpression::evaluate(Environment& env) {
-        return env.getVariable(SymbolTable::insert(mName));
+        // return env.getVariable(SymbolTable::insert(mName));
+        return env.getVariable(mVariableNameSymbolId);
 
     }
     // -------------------------------------------------------------------------
     Value MethodExpression::evaluate(Environment& env) {
-        Value objectPointer = env.getVariable(SymbolTable::insert(mPointerName));
+        Value objectPointer = env.getVariable(mPointerNameSymbolId);
         if (!objectPointer.isPointer()) {
-            Tools::errorf("RunTime Error: Object %s not found.\n", mPointerName.c_str());
+            // Tools::errorf("RunTime Error: Object %s not found.\n", mPointerName.c_str());
+            Tools::errorf("RunTime Error: Object %s not found.\n", SymbolTable::getName(mPointerNameSymbolId).c_str());
             return Value();
         }
         ValueObject* obj = dynamic_cast<ValueObject*>(objectPointer.asPointerObject());
         if (!obj) {
-            Tools::errorf("RunTime Error: Invalid Object: %s.\n", mPointerName.c_str());
+            Tools::errorf("RunTime Error: Invalid Object: %s.\n", SymbolTable::getName(mPointerNameSymbolId).c_str());
             return Value();
         }
         std::vector<Value> evaluatedArgs;
@@ -51,8 +53,11 @@ namespace DreiZehn {
 
         Value returnValue = Value(0);
 
-        if (!obj->onMethodCall(mMethodName, evaluatedArgs, returnValue)) {
-            Tools::errorf("Runtime Error in method call: %s -> %s\n", mPointerName.c_str(), mMethodName.c_str());
+        if (!obj->onMethodCall(mMethodNameSymbolId, evaluatedArgs, returnValue)) {
+            Tools::errorf("Runtime Error in method call: %s -> %s\n",
+                          SymbolTable::getName(mPointerNameSymbolId).c_str(),
+                          SymbolTable::getName(mMethodNameSymbolId).c_str()
+            );
         }
         return returnValue;
 
@@ -60,7 +65,8 @@ namespace DreiZehn {
     // -------------------------------------------------------------------------
     Value CallExpression::evaluate(Environment& env) {
         FunctionMap::CallBack* cb = nullptr;
-        cb = FunctionMap::GetCFunction(mFuncName);
+
+        cb = FunctionMap::GetCFunction(mFuncSymbolId);
         if (cb) {
 
             std::vector<Value> evaluatedArgs;
@@ -69,19 +75,17 @@ namespace DreiZehn {
             }
 
             Value returnValue = Value(0);
-            // bool success = FunctionMap::RegisteredFunctions[funcName](evaluatedArgs, returnValue);
             bool success = (*cb)(evaluatedArgs, returnValue);
 
             if (!success) {
-                Tools::errorf("Runtime Error in function: %s\n", mFuncName.c_str());
+                Tools::errorf("Runtime Error in function: %s\n", SymbolTable::getName(mFuncSymbolId).c_str());
             }
             return returnValue;
         }
 
-        const FunctionMap::ScriptFunction* sf = FunctionMap::GetScriptFunction(mFuncName);
+        const FunctionMap::ScriptFunction* sf = FunctionMap::GetScriptFunction(mFuncSymbolId);
 
         if (sf) {
-            // auto& func = FunctionMap::RegisteredScriptFunctions[funcName];
             auto& func = *(sf);
             Environment localEnv(&env);
 
@@ -104,7 +108,7 @@ namespace DreiZehn {
             return functionResult;
         }
 
-        Tools::errorf("Unknown command: %s\n", mFuncName.c_str());
+        Tools::errorf("Unknown command: %s\n", SymbolTable::getName(mFuncSymbolId).c_str());
         return Value();
 
     }

@@ -64,7 +64,7 @@ namespace DreiZehn {
 
                 // --- fn ---
                 if (auto* startNode = dynamic_cast<FunctionDefineStartNode*>(ast.get())) {
-                    blockStack.push_back({BlockType::Function, startNode->mFnName, nullptr});
+                    blockStack.push_back({BlockType::Function, startNode->mFnNameSymbolId, nullptr});
                     continue;
                 }
 
@@ -86,12 +86,12 @@ namespace DreiZehn {
                         blockPtr = std::static_pointer_cast<BlockStatement>(sharedBase).get();
                     }
 
-                    blockStack.push_back({bType, "", blockPtr});
+                    blockStack.push_back({bType, 0, blockPtr});
                     // ------
                     if (blockStack.size() > 1) {
                         auto& outerBlock = blockStack[blockStack.size() - 2];
                         if (outerBlock.mType == BlockType::Function) {
-                            FunctionMap::RegisteredScriptFunctions[outerBlock.mFuncName].body.push_back(sharedLoop);
+                            FunctionMap::RegisteredScriptFunctions[outerBlock.mFuncNameSymbolId].body.push_back(sharedLoop);
                         }
                         else if (outerBlock.mType == BlockType::ForLoop) {
                             auto* actualFor = dynamic_cast<ForStatement*>(outerBlock.mBlockNodePointer);
@@ -156,7 +156,7 @@ namespace DreiZehn {
                     std::shared_ptr<ASTNode> sharedAst = std::move(ast);
 
                     if (currentBlock.mType == BlockType::Function) {
-                        FunctionMap::RegisteredScriptFunctions[currentBlock.mFuncName].body.push_back(sharedAst);
+                        FunctionMap::RegisteredScriptFunctions[currentBlock.mFuncNameSymbolId].body.push_back(sharedAst);
                     } else if (currentBlock.mType == BlockType::ForLoop || currentBlock.mType == BlockType::WhileLoop) {
                         currentBlock.mBlockNodePointer->mBody.push_back(sharedAst);
                     } else if (currentBlock.mType == BlockType::IfBlock) {

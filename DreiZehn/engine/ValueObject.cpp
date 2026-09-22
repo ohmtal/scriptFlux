@@ -17,9 +17,9 @@
 
 namespace DreiZehn {
     // -------------------------------------------------------------------------
-    bool StringValueObject::onMethodCall(std::string methodName,  std::vector<Value>& args, Value& ret) {
+    bool StringValueObject::onMethodCall(uint32_t methodNameSymbolId,  std::vector<Value>& args, Value& ret) {
 
-        if (methodName == "toNumber") {
+        if (methodNameSymbolId == SymbolTable::insert( "toNumber" ) ) {
             char* endptr = nullptr;
             double resDouble = std::strtod(mValue.c_str(), &endptr);
             if (mValue.empty() || *endptr != '\0') {

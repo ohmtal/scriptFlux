@@ -10,25 +10,26 @@
 #include <vector>
 #include <string>
 #include "Value.h"
+#include "SymbolTable.h"
 
 namespace DreiZehn::FunctionMap {
     class Enviorment;
     using CallBack =  std::function< bool ( std::vector<Value>&, Value& )>;
-    using FuncLookupMap = std::unordered_map<std::string, CallBack>;
+    using FuncLookupMap = std::unordered_map<uint32_t, CallBack>;
 
     // Functions
     inline FuncLookupMap RegisteredFunctions;
 
     inline void RegisterFunction(const std::string& name, CallBack cb) {
-        RegisteredFunctions[name] = cb;
+        RegisteredFunctions[SymbolTable::insert(name) ] = cb;
     }
 
-    inline bool IsCFunction (const std::string& name) {
-        return RegisteredFunctions.find(name) != RegisteredFunctions.end();
+    inline bool IsCFunction (uint32_t symbolId) {
+        return RegisteredFunctions.find(symbolId) != RegisteredFunctions.end();
     }
 
-    inline CallBack* GetCFunction (const std::string& name) {
-        auto it = RegisteredFunctions.find(name);
+    inline CallBack* GetCFunction (uint32_t symbolId) {
+        auto it = RegisteredFunctions.find(symbolId);
         if (it != RegisteredFunctions.end())
             return &it->second;
         else
@@ -62,14 +63,14 @@ namespace DreiZehn::FunctionMap {
         std::vector<std::shared_ptr<ASTNode>> body;
     };
 
-    inline std::unordered_map<std::string, ScriptFunction> RegisteredScriptFunctions;
+    inline std::unordered_map<uint32_t, ScriptFunction> RegisteredScriptFunctions;
 
-    inline bool IsScriptFunction(const std::string& name) {
-        return RegisteredScriptFunctions.find(name) != RegisteredScriptFunctions.end();
+    inline bool IsScriptFunction(uint32_t symbolId) {
+        return RegisteredScriptFunctions.find(symbolId) != RegisteredScriptFunctions.end();
     }
 
-    inline ScriptFunction* GetScriptFunction (const std::string& name) {
-        auto it = RegisteredScriptFunctions.find(name);
+    inline ScriptFunction* GetScriptFunction (uint32_t symbolId) {
+        auto it = RegisteredScriptFunctions.find(symbolId);
         if (it != RegisteredScriptFunctions.end())
             return &it->second;
         else
@@ -78,20 +79,20 @@ namespace DreiZehn::FunctionMap {
 
     // -------------------------------------------------------------
     // combined for parser
-    inline bool IsFunction (const std::string& name) {
-        return IsCFunction(name) || IsScriptFunction(name);
+    inline bool IsFunction (uint32_t symbolId) {
+        return IsCFunction(symbolId) || IsScriptFunction(symbolId);
     }
     // -------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------
-    using ConstantsLookupMap = std::unordered_map<std::string, Value>;
+    using ConstantsLookupMap = std::unordered_map<uint32_t, Value>;
     inline ConstantsLookupMap RegisteredConstants;
 
     inline void RegisterConstants(const std::string& name, Value value) {
-        RegisteredConstants[name] = value;
+        RegisteredConstants[SymbolTable::insert( name )] = value;
     }
-    inline Value* getConstants( const std::string& name) {
-        auto it = RegisteredConstants.find(name);
+    inline Value* getConstants( uint32_t symbolId) {
+        auto it = RegisteredConstants.find(symbolId);
         if (it != RegisteredConstants.end())
             return &it->second;
         else

@@ -28,7 +28,8 @@ namespace DreiZehn {
 
     struct OpenBlock {
         BlockType mType;
-        std::string mFuncName;
+        // std::string mFuncName;
+        uint32_t mFuncNameSymbolId;
         BlockStatement* mBlockNodePointer;
     };
 

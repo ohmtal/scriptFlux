@@ -20,16 +20,16 @@ namespace DreiZehn {
         ~ArrayValueObject() = default;
 
         // -------------------------------------------------------------------------
-        inline bool onMethodCall(std::string methodName,  std::vector<Value>& args, Value& ret) override {
+        inline bool onMethodCall(uint32_t methodId,  std::vector<Value>& args, Value& ret) override {
 
-            if (methodName == "push") {
+            if (methodId == SymbolTable::insert( "push")) {
                 if (args.size() != 1 ) return false;
                 mElements.push_back(args[0]);
                 ret = Value(args[0]);
                 return true;
             }
             else
-            if (methodName == "pop") {
+            if (methodId == SymbolTable::insert( "pop")) {
                 if (args.size() != 0 ) return false;
                 if (mElements.size() > 0) {
                     ret = Value(mElements.back());
@@ -40,13 +40,13 @@ namespace DreiZehn {
                 return true;
             }
             else
-            if (methodName == "size") {
+            if (methodId == SymbolTable::insert( "size")) {
                 if (args.size() != 0 ) return false;
                 ret = Value(static_cast<int>(mElements.size()));
                 return true;
             }
             else
-            if (methodName == "get" || methodName == "at") {
+            if (methodId == SymbolTable::insert( "get") || methodId == SymbolTable::insert( "at")) {
                 if (args.size() != 1) return false;
                 if (mElements.size() > args[0].getInt()) {
                     ret = Value(mElements.at(args[0].getInt()));
@@ -54,7 +54,7 @@ namespace DreiZehn {
                 return true;
             }
             else
-            if (methodName == "set") {
+            if (methodId == SymbolTable::insert( "set" ))  {
                 if (args.size() != 2 || mElements.size() <= args[0].getInt()) return false;
                 mElements[args[0].getInt()] = args[1];
                 ret =  args[1];

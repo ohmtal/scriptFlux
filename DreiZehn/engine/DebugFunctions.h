@@ -29,17 +29,15 @@ namespace DreiZehn {
             const bool printScriptFunc = args.size() > 0 && args.at(0).getInt() == 1;
             Tools::printf("  --- Functions [%zu] --- \n", RegisteredFunctions.size());
             for (const auto& [key, value] : RegisteredFunctions) {
-                Tools::printf("  - %s \n", key.c_str());
+                Tools::printf("  - %s \n", SymbolTable::getName(key).c_str());
             }
 
             if (printScriptFunc) {
                 Tools::printf("  --- Script Functions [%zu] --- \n", RegisteredScriptFunctions.size());
                 for (const auto& [key, value] : RegisteredScriptFunctions) {
-                    Tools::printf("  - %s \n", key.c_str());
+                    Tools::printf("  - %s \n", SymbolTable::getName(key).c_str());
                 }
             }
-
-
             return true;
         });
 

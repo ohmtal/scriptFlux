@@ -38,6 +38,7 @@ private:
 
     static SymbolTable& get() {
         static SymbolTable instance;
+        instance.internalInsert(""); //first is a emty string
         return instance;
     }
 

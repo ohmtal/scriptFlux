@@ -56,30 +56,37 @@ struct ValueExpression : public Expression {
 
 // Variables -------------------------------------------------------------------
 struct VariableExpression : public Expression {
-    std::string mName;
-    VariableExpression(std::string n) : mName(n) {}
+    // std::string mName;
+    uint32_t mVariableNameSymbolId = 0;
+    VariableExpression(uint32_t n) : mVariableNameSymbolId(n) {}
     Value evaluate(Environment& env) override; // Liest aus env.variables
 };
 
 // function calls --------------------------------------------------------------
 struct CallExpression : public Expression {
-    std::string mFuncName;
+    // std::string mFuncName;
+    uint32_t mFuncSymbolId = 0;
     std::vector<std::unique_ptr<Expression>> arguments;
 
-    CallExpression(std::string name, std::vector<std::unique_ptr<Expression>> args)
-    : mFuncName(name), arguments(std::move(args)) {}
+    CallExpression(uint32_t funcSymbolID, std::vector<std::unique_ptr<Expression>> args)
+    : mFuncSymbolId(funcSymbolID), arguments(std::move(args)) {}
 
     Value evaluate(Environment& env) override;
 };
 
 // method/field on Pointer  calls --------------------------------------------------------------
 struct MethodExpression : public Expression {
-    std::string mPointerName;
-    std::string mMethodName;
+    // std::string mPointerName;
+    // std::string mMethodName;
+
+    uint32_t mPointerNameSymbolId;
+    uint32_t mMethodNameSymbolId;
+
+
     std::vector<std::unique_ptr<Expression>> mArguments;
 
-    MethodExpression(std::string PointerName,std::string MethodName, std::vector<std::unique_ptr<Expression>> args)
-    : mPointerName(PointerName), mMethodName(MethodName), mArguments(std::move(args)) {}
+    MethodExpression(uint32_t pointerNameSymId, uint32_t methodNameSymId, std::vector<std::unique_ptr<Expression>> args)
+    : mPointerNameSymbolId(pointerNameSymId), mMethodNameSymbolId(methodNameSymId), mArguments(std::move(args)) {}
 
     Value evaluate(Environment& env) override;
 };
@@ -116,8 +123,9 @@ struct IfStatement : public BlockStatement {
 struct ElseMarkerNode: public ASTNode {};
 // fn --------------------------------------------------------------------------
 struct FunctionDefineStartNode : public ASTNode {
-    std::string mFnName;
-    FunctionDefineStartNode(std::string n) : mFnName(n) {}
+    // std::string mFnName;
+    uint32_t mFnNameSymbolId;
+    FunctionDefineStartNode(uint32_t symId) : mFnNameSymbolId(symId) {}
 };
 
 // end -------------------------------------------------------------------------
