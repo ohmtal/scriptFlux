@@ -22,12 +22,10 @@ don't have to PoD Types here at the moment.
 - [X] Added else and finally fixed If as BlockStatement - run in a own execute !! .. variables ?!?
 - [X] "!=" as compare 
 - [X] add a constant system ...
-
-- write the starfield demo in DreiZehn
-- local / global var is sometime mixed - since we fetch a global it is not found on local scope
-but it's a bit unclear when its global and when its local. 
+- [X] write the starfield demo in DreiZehn
 
 # 0.4
+- need || and && else the if looks ugly 
 - how does it handle => If myFunc 10 20 == 0 ? 
 - true and false is missing 
 - ~~'!=' and~~ '!' is missing
@@ -36,6 +34,8 @@ but it's a bit unclear when its global and when its local.
 
 # future ideas
 
+- local / global var is sometime mixed - since we fetch a global it is not found on local scope
+but it's a bit unclear when its global and when its local. 
 - change printf errorf to a overwritable class or add a handler 
 - make header only 
 - move to it's own project
