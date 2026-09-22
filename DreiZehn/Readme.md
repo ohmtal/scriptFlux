@@ -4,6 +4,10 @@ A lightweight, line by line, embedded scripting language built from scratch in C
 
 [Benchmark Results](Benchmark.md )
 
+```
+Ich wollte mir nur mal NaN boxing anschauen und dann hab ich gleich eine kleine Scriptsprache Drumherum gebaut *lol*.
+```
+
 ## Text Edior
 
 Since it's a uncommon syntax i had good results in my Editor setting Highlight mode:

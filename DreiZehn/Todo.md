@@ -22,16 +22,13 @@ don't have to PoD Types here at the moment.
 - [X] Added else and finally fixed If as BlockStatement - run in a own execute !! .. variables ?!?
 - [X] "!=" as compare 
 - [X] add a constant system ...
+    - true and false added in core
 - [X] write the starfield demo in DreiZehn
 - [X] test params  => if (math.random 10 20) != 4 print "huhu" end
 - [X] need: ||, &&, <=, >=, >>, <<, |, &
-- [ ] test Pointer call syntax '->'
+- [X] Pointer method calles with Array '->' \o/
 
 # 0.4
-- true and false is missing 
-- ~~'!=' and~~ '!' is missing
-- else is missing 
-- Preprocessor constants from ElfScript
 
 # future ideas
 

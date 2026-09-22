@@ -75,77 +75,76 @@ namespace DreiZehn {
             return true;
         });
 
-        // Replaced By Methods :)
-        // // // ---------------------------------------------------------------------
-        // // RegisterFunction("array.push", [](std::vector<Value>& args, Value& ret) -> bool {
-        // //     if (args.size() != 2) {
-        // //         Tools::errorf("usage: array.push arr value\n");
-        // //         return false;
-        // //     }
-        // //     auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
-        // //     if (!arr) return false;
-        // //
-        // //     arr->elements.push_back(args[1]);
-        // //     ret = args[1];
-        // //     return true;
-        // // });
-        // //
-        // // RegisterFunction("array.pop", [](std::vector<Value>& args, Value& ret) -> bool {
-        // //     if (args.size() != 1) {
-        // //         Tools::errorf("usage: array.pop arr\n");
-        // //         return false;
-        // //     }
-        // //     auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
-        // //     if (!arr) return false;
-        // //
-        // //     if (arr->elements.size() > 0) {
-        // //         ret = Value(arr->elements.back());
-        // //         arr->elements.pop_back();
-        // //     } else {
-        // //         ret= Value();
-        // //     }
-        // //     return true;
-        // // });
-        // // // ---------------------------------------------------------------------
-        // // RegisterFunction("array.size", [](std::vector<Value>& args, Value& ret) -> bool {
-        // //     if (args.size() != 1) return false;
-        // //     auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
-        // //     if (!arr) return false;
-        // //
-        // //     ret = Value(static_cast<double>(arr->elements.size()));
-        // //     return true;
-        // // });
-        // //
-        // // // ---------------------------------------------------------------------
-        // // RegisterFunction("array.get", [](std::vector<Value>& args, Value& ret) -> bool {
-        // //     if (args.size() != 2) return false;
-        // //     auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
-        // //     int idx = static_cast<int>(args[1].getDouble());
-        // //
-        // //     if (!arr || idx < 0 || idx >= static_cast<int>(arr->elements.size())) {
-        // //         Tools::errorf("array.get: Index out of bounds oder ungültiges Array\n");
-        // //         return false;
-        // //     }
-        // //
-        // //     ret = arr->elements[idx];
-        // //     return true;
-        // // });
-        // //
-        // // // ---------------------------------------------------------------------
-        // // RegisterFunction("array.set", [](std::vector<Value>& args, Value& ret) -> bool {
-        // //     if (args.size() != 3) return false;
-        // //     auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
-        // //     int idx = static_cast<int>(args[1].getDouble());
-        // //
-        // //     if (!arr || idx < 0 || idx >= static_cast<int>(arr->elements.size())) {
-        // //         Tools::errorf("array.set: Index out of bounds\n");
-        // //         return false;
-        // //     }
-        // //
-        // //     arr->elements[idx] = args[2];
-        // //     ret = args[2];
-        // //     return true;
-        // // });
+        // ---------------------------------------------------------------------
+        RegisterFunction("Array.push", [](std::vector<Value>& args, Value& ret) -> bool {
+            if (args.size() != 2) {
+                Tools::errorf("usage: Array.push arr value\n");
+                return false;
+            }
+            auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
+            if (!arr) return false;
+
+            arr->elements.push_back(args[1]);
+            ret = args[1];
+            return true;
+        });
+
+        RegisterFunction("Array.pop", [](std::vector<Value>& args, Value& ret) -> bool {
+            if (args.size() != 1) {
+                Tools::errorf("usage: Array.pop arr\n");
+                return false;
+            }
+            auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
+            if (!arr) return false;
+
+            if (arr->elements.size() > 0) {
+                ret = Value(arr->elements.back());
+                arr->elements.pop_back();
+            } else {
+                ret= Value();
+            }
+            return true;
+        });
+        // ---------------------------------------------------------------------
+        RegisterFunction("Array.size", [](std::vector<Value>& args, Value& ret) -> bool {
+            if (args.size() != 1) return false;
+            auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
+            if (!arr) return false;
+
+            ret = Value(static_cast<double>(arr->elements.size()));
+            return true;
+        });
+
+        // ---------------------------------------------------------------------
+        RegisterFunction("Array.get", [](std::vector<Value>& args, Value& ret) -> bool {
+            if (args.size() != 2) return false;
+            auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
+            int idx = static_cast<int>(args[1].getDouble());
+
+            if (!arr || idx < 0 || idx >= static_cast<int>(arr->elements.size())) {
+                Tools::errorf("Array.get: Index out of bounds oder ungültiges Array\n");
+                return false;
+            }
+
+            ret = arr->elements[idx];
+            return true;
+        });
+
+        // ---------------------------------------------------------------------
+        RegisterFunction("Array.set", [](std::vector<Value>& args, Value& ret) -> bool {
+            if (args.size() != 3) return false;
+            auto* arr = dynamic_cast<ArrayValueObject*>(args[0].asPointerObject());
+            int idx = static_cast<int>(args[1].getDouble());
+
+            if (!arr || idx < 0 || idx >= static_cast<int>(arr->elements.size())) {
+                Tools::errorf("Array.set: Index out of bounds\n");
+                return false;
+            }
+
+            arr->elements[idx] = args[2];
+            ret = args[2];
+            return true;
+        });
         // ---------------------------------------------------------------------
     }
 

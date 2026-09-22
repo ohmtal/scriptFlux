@@ -32,15 +32,15 @@ fn Init
     Renderer = SDL_CreateRenderer Window
     Event = SDL_CreateEvent
 
-    Points_X = array.new
-    Points_Y = array.new
-    Points_Z = array.new
+    Points_X = Array.new
+    Points_Y = Array.new
+    Points_Z = Array.new
 
     i = 0
     while i < STAR_COUNT
-        array.push Points_X math.random minW maxW
-        array.push Points_Y math.random minH maxH
-        array.push Points_Z math.randomf
+        Array.push Points_X math.random minW maxW
+        Array.push Points_Y math.random minH maxH
+        Array.push Points_Z math.randomf
         i = i + 1
     end
 
@@ -74,9 +74,9 @@ if Init
 
         i = 0
         while i < STAR_COUNT
-            pX = array.get Points_X i
-            pY = array.get Points_Y i
-            pZ = array.get Points_Z i
+            pX = Array.get Points_X i
+            pY = Array.get Points_Y i
+            pZ = Array.get Points_Z i
 
             pZ = pZ - (Dt * Speed)
 
@@ -106,9 +106,9 @@ if Init
                 SDL_RenderFillRect Renderer screenX screenY radius radius
             end
 
-            array.set Points_X i pX
-            array.set Points_Y i pY
-            array.set Points_Z i pZ
+            Array.set Points_X i pX
+            Array.set Points_Y i pY
+            Array.set Points_Z i pZ
 
             i = i + 1
         end
