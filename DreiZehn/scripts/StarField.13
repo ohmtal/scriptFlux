@@ -57,11 +57,11 @@ if Init
 
         while SDL_PollEvent Event
             Type = SDL_GetEventType Event
-            if Type == 256
+            if Type == SDL_EVENT_QUIT
                 Running = false
             end
-            if Type == 768
-                if (SDL_GetEventKey Event) == 27
+            if Type == SDL_EVENT_KEY_DOWN
+                if (SDL_GetEventKey Event) == SDLK_ESCAPE
                     Running = false
                 end
             end
