@@ -114,6 +114,34 @@ namespace DreiZehn {
     }
     // -------------------------------------------------------------------------
 
+    Value BinaryOpExpression::evaluate(Environment& env)  {
+        if (!mLeft.get() || !mRight.get()) {
+            Tools::PrintParseError("left or right is missing:");
+            return Value();
+        }
+        Value lVal = mLeft->evaluate(env);
+        Value rVal = mRight->evaluate(env);
+
+        if (lVal.isInt() && rVal.isInt()) {
+            if (mOp == TokenType::Plus) return Value(lVal.asInt() + rVal.asInt());
+            if (mOp == TokenType::Minus) return Value(lVal.asInt() - rVal.asInt());
+            if (mOp == TokenType::Mul) return Value(lVal.asInt() * rVal.asInt());
+            if (mOp == TokenType::Div) return Value(lVal.asInt() / rVal.asInt());
+        }
+        double lNum = lVal.getDouble();
+        double rNum = rVal.getDouble();
+
+        if (mOp == TokenType::Plus) return Value(lNum + rNum);
+        if (mOp == TokenType::Minus) return Value(lNum - rNum);
+        if (mOp == TokenType::Mul) return Value(lNum * rNum);
+        if (mOp == TokenType::Div) return Value(lNum / rNum);
+
+        return Value();
+
+    }
+
+    // -------------------------------------------------------------------------
+
     Value BinaryExpression::evaluate(Environment& env)  {
         if (!mLeft.get() || !mRight.get()) {
             Tools::PrintParseError("left or right is missing:");
@@ -200,19 +228,19 @@ namespace DreiZehn {
             return Value( l >> r);
         }
 
-        if (lVal.isInt() && rVal.isInt()) {
-            if (mOp == TokenType::Plus) return Value(lVal.asInt() + rVal.asInt());
-            if (mOp == TokenType::Minus) return Value(lVal.asInt() - rVal.asInt());
-            if (mOp == TokenType::Mul) return Value(lVal.asInt() * rVal.asInt());
-            if (mOp == TokenType::Div) return Value(lVal.asInt() / rVal.asInt());
-        }
-        double lNum = lVal.getDouble();
-        double rNum = rVal.getDouble();
-
-        if (mOp == TokenType::Plus) return Value(lNum + rNum);
-        if (mOp == TokenType::Minus) return Value(lNum - rNum);
-        if (mOp == TokenType::Mul) return Value(lNum * rNum);
-        if (mOp == TokenType::Div) return Value(lNum / rNum);
+        // if (lVal.isInt() && rVal.isInt()) {
+        //     if (mOp == TokenType::Plus) return Value(lVal.asInt() + rVal.asInt());
+        //     if (mOp == TokenType::Minus) return Value(lVal.asInt() - rVal.asInt());
+        //     if (mOp == TokenType::Mul) return Value(lVal.asInt() * rVal.asInt());
+        //     if (mOp == TokenType::Div) return Value(lVal.asInt() / rVal.asInt());
+        // }
+        // double lNum = lVal.getDouble();
+        // double rNum = rVal.getDouble();
+        //
+        // if (mOp == TokenType::Plus) return Value(lNum + rNum);
+        // if (mOp == TokenType::Minus) return Value(lNum - rNum);
+        // if (mOp == TokenType::Mul) return Value(lNum * rNum);
+        // if (mOp == TokenType::Div) return Value(lNum / rNum);
 
         return Value();
     }

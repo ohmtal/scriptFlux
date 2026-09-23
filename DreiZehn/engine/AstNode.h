@@ -88,11 +88,11 @@ struct MethodExpression : public Expression {
 };
 // Assingment ------------------------------------------------------------------
 struct AssignStatement : public ASTNode {
-    std::string mVarName; //TODO
+    uint32_t mVarNameSymbolId;
     std::unique_ptr<Expression> mRhs; // Right-Hand Side
 
-    AssignStatement(std::string name, std::unique_ptr<Expression> expr)
-    : mVarName(name), mRhs(std::move(expr)) {}
+    AssignStatement(uint32_t varNameSymId, std::unique_ptr<Expression> expr)
+    : mVarNameSymbolId(varNameSymId), mRhs(std::move(expr)) {}
 };
 // Binary ----------------------------------------------------------------------
 struct BinaryExpression : public Expression {
@@ -101,6 +101,17 @@ struct BinaryExpression : public Expression {
     std::unique_ptr<Expression> mRight;
 
     BinaryExpression(std::unique_ptr<Expression> l, TokenType o, std::unique_ptr<Expression> r)
+    : mLeft(std::move(l)), mOp(o), mRight(std::move(r)) {}
+
+    Value evaluate(Environment& env) override;
+};
+// Binary ----------------------------------------------------------------------
+struct BinaryOpExpression : public Expression {
+    std::unique_ptr<Expression> mLeft;
+    TokenType mOp;
+    std::unique_ptr<Expression> mRight;
+
+    BinaryOpExpression(std::unique_ptr<Expression> l, TokenType o, std::unique_ptr<Expression> r)
     : mLeft(std::move(l)), mOp(o), mRight(std::move(r)) {}
 
     Value evaluate(Environment& env) override;

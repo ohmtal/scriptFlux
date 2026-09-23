@@ -22,7 +22,16 @@
 #include "Globals.h"
 #include "SymbolTable.h"
 
+// Byte Code
+#include "VMStructure.h"
+#include "CompilerScope.h"
+#include "ASTCompiler.h"
+#include "VM.h"
+
+
+
 namespace DreiZehn {
+
 
     enum class BlockType { Function, ForLoop, WhileLoop, IfBlock };
 
@@ -111,32 +120,6 @@ public:
         Tools::errorf("Variable not found: %s\n", varName.c_str());
         return Value();
     }
-
-
-// //     void setVariable(const std::string& name, Value val) {
-// //
-// //         auto it = mVariables.find(name);
-// //         if (it != mVariables.end()) {
-// //             it->second = val;
-// //         }
-// //         if (mParentEnv != nullptr) {
-// //             mParentEnv->setVariable(name, val);
-// //             return;
-// //         }
-// //
-// //         mVariables[name] = val;
-// //     }
-// //
-// //     Value getVariable(const std::string& name) {
-// //         if (mVariables.find(name) != mVariables.end()) {
-// //             return mVariables.at(name);
-// //         }
-// //         if (mParentEnv != nullptr) {
-// //             return mParentEnv->getVariable(name); // global scope
-// //         }
-// //         Tools::errorf("Variable not found: %s\n", name.c_str());
-// //         return Value();
-// //     }
     // -------------------------------------------------------------------------
     // GarbageCollection
     // -------------------------------------------------------------------------
@@ -175,9 +158,39 @@ public:
         }
 
         // --- Assign ---
+// #define DREIZEHN_BYTECODE
+#ifdef DREIZEHN_BYTECODE
+        // NOTE NEW DIRECT THREADING BYTE CODE COMPILER !! FIXME StringObject
         if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
-            currentEnv.setVariable(SymbolTable::insert(assign->mVarName), assign->mRhs->evaluate(currentEnv));
+            // new chunk
+            BytecodeChunk chunk;
+            CompilerScope scope;
+
+            // compile
+            ASTCompiler::compileExpression(assign->mRhs.get(), chunk, scope);
+            chunk.emit(OpCode::Exit);
+
+            // FIXME HACK variable in >>>>
+            std::vector<Value> locals(std::max(scope.getLocalCount(), 64), Value(0.0));
+            for (int slot = 0; slot < scope.getLocalCount(); ++slot) {
+                uint32_t varId = scope.getSymbolIdForSlot(slot);
+                locals[slot] = currentEnv.getVariable(varId);
+            }
+            //  <<<<<
+
+            // fire!
+            Value result = runDirectThreadedVM(chunk,  /*HACK scope.getLocalCount()*/ locals);
+            // save
+            currentEnv.setVariable(assign->mVarNameSymbolId, result);
         }
+#else
+        // prev byte code:
+        if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
+            currentEnv.setVariable(assign->mVarNameSymbolId, assign->mRhs->evaluate(currentEnv));
+        }
+#endif
+
+
         // --- If-Statement  ---
         else if (auto* ifStmt = dynamic_cast<IfStatement*>(node)) {
             Value condVal = ifStmt->mCondition->evaluate(currentEnv);

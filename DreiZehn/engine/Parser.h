@@ -28,14 +28,17 @@ private:
     Token advance() { if (mPos + 1 < mTokens.size()) return mTokens[mPos++]; else return Token(TokenType::EOFToken);}
 
     // -------------------------------------------------------------------------
-
+    bool isMathOperatorType(const Token& op) {
+        return op.mType == TokenType::Plus
+        || op.mType == TokenType::Minus
+        || op.mType == TokenType::Mul
+        || op.mType == TokenType::Div
+        ;
+    }
 
     bool isMathType() {
         return
-        peek().mType == TokenType::Plus
-        || peek().mType == TokenType::Minus
-        || peek().mType == TokenType::Mul
-        || peek().mType == TokenType::Div
+        isMathOperatorType(peek())
         || peek().mType == TokenType::Greater
         || peek().mType == TokenType::Less
         || peek().mType == TokenType::Equal
@@ -136,7 +139,10 @@ private:
         while (isMathType()){
             Token op = advance();
             auto right = parsePrimary();
-            left = std::make_unique<BinaryExpression>(std::move(left), op.mType, std::move(right));
+            if (isMathOperatorType(op))
+                left = std::make_unique<BinaryOpExpression>(std::move(left), op.mType, std::move(right));
+            else
+                left = std::make_unique<BinaryExpression>(std::move(left), op.mType, std::move(right));
         }
 
         return left;
@@ -329,7 +335,7 @@ public:
                 std::string varName = advance().mValue;
                 advance(); // '='
                 auto rhs = parseComparison();
-                return std::make_unique<AssignStatement>(varName, std::move(rhs));
+                return std::make_unique<AssignStatement>(SymbolTable::insert( varName), std::move(rhs));
             }
             else if (peekNext().mType == TokenType::Arrow) {
                 return parsePrimary();

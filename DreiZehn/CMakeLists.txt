@@ -36,6 +36,7 @@ set(PROJECT_SRC
     engine/ArrayFunctions.h
 
     engine/SymbolTable.h
+    engine/CompilerScope.h
 
     engine/Globals.h
     engine/DreiZehn.h

@@ -6,13 +6,6 @@
 // NOTE: Singleton
 //-----------------------------------------------------------------------------
 #pragma once
-#pragma once
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <cstdint>
-
-#pragma once
 #include <string>
 #include <unordered_map>
 #include <vector>
