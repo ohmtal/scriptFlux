@@ -1,5 +1,13 @@
 # DreiZehn-Script: Scripting Language Syntax & Documentation
 
+## ----- MOVED TO ElfScript Repo -----
+## ----- MOVED TO ElfScript Repo -----
+## ----- MOVED TO ElfScript Repo -----
+
+
+---
+
+
 A lightweight, line by line, embedded scripting language built from scratch in C++. 
 
 [Benchmark Results](Benchmark.md )
