@@ -22,7 +22,6 @@ void RegisterUserFunc() {
 int main(int argc, char* argv[]) {
     using namespace DreiZehn;
 
-    initBytecodeEngine();
     Environment env;
     RegisterCoreFunctions(env);
     RegisterArrayFunctions(env);

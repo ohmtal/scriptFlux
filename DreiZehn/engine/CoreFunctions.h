@@ -13,9 +13,6 @@ namespace DreiZehn {
 
 
     void RegisterCoreFunctions( Environment& env) {
-        // FIXME SOMEWHERE ELSE :: need a init
-        initBytecodeEngine();
-
         using namespace FunctionMap;
         // ---------------------------------------------------------------------
         // also push some CORE Constants here:

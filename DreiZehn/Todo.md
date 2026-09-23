@@ -27,8 +27,12 @@ don't have to PoD Types here at the moment.
 - [X] test params  => if (math.random 10 20) != 4 print "huhu" end
 - [X] need: ||, &&, <=, >=, >>, <<, |, &
 - [X] Pointer method calles with Array '->' \o/
+- [X] rewrote RunScript .. 
+- [X] added Symbols Table for fast lookup variables/functions/constants ....
+- [X] optimized a bit 
 
 # 0.4
+- [ ] Bytecode 
 
 # future ideas
 

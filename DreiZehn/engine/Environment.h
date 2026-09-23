@@ -3,8 +3,12 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------
 // Enviroment VM
+
+// #define DREIZEHN_BYTECODE
 //-----------------------------------------------------------------------------
 #pragma once
+
+
 
 #include <string>
 #include <vector>
@@ -23,12 +27,14 @@
 #include "SymbolTable.h"
 
 // Byte Code
+#ifdef DREIZEHN_BYTECODE
+
 #include "VMStructure.h"
 #include "CompilerScope.h"
 #include "ASTCompiler.h"
 #include "VM.h"
 
-
+#endif
 
 namespace DreiZehn {
 
@@ -158,7 +164,6 @@ public:
         }
 
         // --- Assign ---
-// #define DREIZEHN_BYTECODE
 #ifdef DREIZEHN_BYTECODE
         // NOTE NEW DIRECT THREADING BYTE CODE COMPILER !! FIXME StringObject
         if (auto* assign = dynamic_cast<AssignStatement*>(node)) {
