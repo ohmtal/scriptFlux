@@ -17,6 +17,14 @@
 
 namespace DreiZehn {
     // -------------------------------------------------------------------------
+    bool ValueObjectMethod::ValidateArgs( std::vector<Value>& args) {
+        if (args.size() < mMinParams || args.size() > mMaxParams) {
+            Tools::errorf("Method %s parameter error. min:%d max:%d %s\n", mName.c_str(),mMinParams, mMaxParams, mHelp.c_str());
+            return false;
+        }
+        return true;
+    }
+    // -------------------------------------------------------------------------
     bool StringValueObject::onMethodCall(uint32_t methodNameSymbolId,  std::vector<Value>& args, Value& ret) {
 
         if (methodNameSymbolId == SymbolTable::insert( "toNumber" ) ) {

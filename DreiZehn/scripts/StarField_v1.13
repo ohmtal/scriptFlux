@@ -16,6 +16,10 @@ Renderer    = 0
 Event       = 0
 Speed       = 0.4
 fontScale   = 1.2
+-- init to stay in global scope
+Points_X = 0
+Points_Y = 0
+Points_Z = 0
 
 fn Init
     if (SDL_Init SDL_INIT_VIDEO) == false

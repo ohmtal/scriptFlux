@@ -54,10 +54,11 @@ namespace DreiZehn {
         Value returnValue = Value(0);
 
         if (!obj->onMethodCall(mMethodNameSymbolId, evaluatedArgs, returnValue)) {
-            Tools::errorf("Runtime Error in method call: %s -> %s\n",
-                          SymbolTable::getName(mPointerNameSymbolId).c_str(),
-                          SymbolTable::getName(mMethodNameSymbolId).c_str()
-            );
+            // let the method handle this.
+            // Tools::errorf("Runtime Error in method call: %s -> %s\n",
+            //               SymbolTable::getName(mPointerNameSymbolId).c_str(),
+            //               SymbolTable::getName(mMethodNameSymbolId).c_str()
+            // );
         }
         return returnValue;
 

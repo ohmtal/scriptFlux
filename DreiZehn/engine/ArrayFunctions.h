@@ -14,23 +14,54 @@
 
 namespace DreiZehn {
 
+//     ValueObjectMethod ArrayValueObject::mPush;
+//     ValueObjectMethod ArrayValueObject::mPop;
+//     ValueObjectMethod ArrayValueObject::mSize;
+//     ValueObjectMethod ArrayValueObject::mGet;
+//     ValueObjectMethod ArrayValueObject::mAt;
+//     ValueObjectMethod ArrayValueObject::mSet;
+//
+
     struct ArrayValueObject : public ValueObject {
         std::vector<Value> mElements;
-        ArrayValueObject() : ValueObject(ValueObjectType::Userdata) {}
+
+
+        ArrayValueObject() : ValueObject(ValueObjectType::Userdata) { initSymbols(); }
         ~ArrayValueObject() = default;
+
+        inline static ValueObjectMethod mPush;
+        inline static ValueObjectMethod mPop;
+        inline static ValueObjectMethod mSize;
+        inline static ValueObjectMethod mGet;
+        inline static ValueObjectMethod mAt;
+        inline static ValueObjectMethod mSet;
+
+        inline static void initSymbols() {
+            static bool mSymbolsLoaded = false;
+            if (mSymbolsLoaded) return;
+            //  ValueObjectMethod(std::string name,  uint32_t minParams, uint32_t maxParams, std::string help)
+            mPush  = ValueObjectMethod("push", 1,1, "push a value to the end of the Array. @param Value");
+            mPop   = ValueObjectMethod("pop", 0,0,  "pop the last value and return it");
+            mSize  = ValueObjectMethod("size", 0,0, "get to size (count)");
+            mGet   = ValueObjectMethod("get", 1,1,  "get a value at index. @param index");
+            mAt    = ValueObjectMethod("at", 1,1,   "get a value at index. @param index");
+            mSet   = ValueObjectMethod("set", 2,2,  "set a value at index. @param index, @param Value");
+            mSymbolsLoaded = true;
+        }
 
         // -------------------------------------------------------------------------
         inline bool onMethodCall(uint32_t methodId,  std::vector<Value>& args, Value& ret) override {
 
-            if (methodId == SymbolTable::insert( "push")) {
-                if (args.size() != 1 ) return false;
+
+            if ( methodId == mPush.mSymbolId ) {
+                if (!mPush.ValidateArgs(args)) return false;
                 mElements.push_back(args[0]);
                 ret = Value(args[0]);
                 return true;
             }
             else
-            if (methodId == SymbolTable::insert( "pop")) {
-                if (args.size() != 0 ) return false;
+            if (methodId == mPop.mSymbolId) {
+                if (!mPop.ValidateArgs(args)) return false;
                 if (mElements.size() > 0) {
                     ret = Value(mElements.back());
                     mElements.pop_back();
@@ -40,22 +71,22 @@ namespace DreiZehn {
                 return true;
             }
             else
-            if (methodId == SymbolTable::insert( "size")) {
-                if (args.size() != 0 ) return false;
+            if (methodId == mSize.mSymbolId) {
+                if (!mSize.ValidateArgs(args)) return false;
                 ret = Value(static_cast<int>(mElements.size()));
                 return true;
             }
             else
-            if (methodId == SymbolTable::insert( "get") || methodId == SymbolTable::insert( "at")) {
-                if (args.size() != 1) return false;
+            if (methodId == mGet.mSymbolId|| methodId == mAt.mSymbolId) {
+                if (!mGet.ValidateArgs(args)) return false;
                 if (mElements.size() > args[0].getInt()) {
                     ret = Value(mElements.at(args[0].getInt()));
                 }
                 return true;
             }
             else
-            if (methodId == SymbolTable::insert( "set" ))  {
-                if (args.size() != 2 || mElements.size() <= args[0].getInt()) return false;
+            if (methodId == mSet.mSymbolId)  {
+                if (!mSet.ValidateArgs(args)) return false;
                 mElements[args[0].getInt()] = args[1];
                 ret =  args[1];
                 return true;
@@ -122,7 +153,7 @@ namespace DreiZehn {
             int idx = static_cast<int>(args[1].getDouble());
 
             if (!arr || idx < 0 || idx >= static_cast<int>(arr->mElements.size())) {
-                Tools::errorf("Array.get: Index out of bounds oder ungültiges Array\n");
+                Tools::errorf("Array.get: Index out of bounds or invalid Array\n");
                 return false;
             }
 

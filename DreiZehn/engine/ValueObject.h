@@ -16,17 +16,27 @@ enum class ValueObjectType { String, Userdata };
 
 // TODO ... i need a id system for that ?! or as static .. later
 struct ValueObjectMethod {
+    uint32_t mSymbolId = 0;
     bool mIsMethod = true;
     std::string mName;
     std::string mHelp;
     uint32_t mMinParams = 0;
     uint32_t mMaxParams = 0;
+
+    // for static define
+    ValueObjectMethod(){};
     // method
     ValueObjectMethod(std::string name,  uint32_t minParams, uint32_t maxParams, std::string help)
-    : mIsMethod(true),mName(name),  mHelp(help), mMinParams(minParams), mMaxParams(maxParams) {}
+    : mIsMethod(true),mName(name),  mHelp(help), mMinParams(minParams), mMaxParams(maxParams) {
+        mSymbolId = SymbolTable::insert(name);
+    }
     // property
     ValueObjectMethod(std::string name,  std::string help)
-    : mIsMethod(false),mName(name),  mHelp(help), mMinParams(0), mMaxParams(9999) {}
+    : mIsMethod(false),mName(name),  mHelp(help), mMinParams(0), mMaxParams(0) {
+        mSymbolId = SymbolTable::insert(name);
+    }
+
+    bool ValidateArgs( std::vector<Value>& args);
 
 };
 

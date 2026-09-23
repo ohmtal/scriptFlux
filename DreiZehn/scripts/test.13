@@ -7,11 +7,10 @@ if ( foo == 0 )
 end
 print "......."
 
+-- print "... time to break ..."
 -- return
+-- print "...still here ..."
 
--- WORKS NOW :)
--- -- return
--- -- print "--- RETURN but still here ?  ---"
 
 
 # functions

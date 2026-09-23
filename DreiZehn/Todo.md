@@ -29,7 +29,7 @@ don't have to PoD Types here at the moment.
 - [X] Pointer method calles with Array '->' \o/
 - [X] rewrote RunScript .. 
 - [X] added Symbols Table for fast lookup variables/functions/constants ....
-- [X] optimized a bit 
+- [X] optimized a bit found 3 sek on test_var bench ;) 
 
 # 0.4
 - [ ] Bytecode 
